@@ -1,0 +1,449 @@
+REV001
+PT Teknologi Maju Indonesia
+reviewer001@company.com
+5
+5
+5
+Perusahaan sangat bagus dengan work-life balance yang excellent. Tim manajemen sangat supportif dan budaya kerja sangat positif. Gaji sangat kompetitif dan benefit lengkap.
+EMP2025001
+
+REV002
+PT Digital Solusi Nusantara
+reviewer002@company.com
+3
+2
+3
+Work-life balance cukup bagus tapi gaji kurang kompetitif. Manajemen kadang lambat dalam mengambil keputusan. Perlu improvement di sistem kompensasi.
+EMP2025002
+
+REV003
+PT Inovasi Teknologi Pratama
+reviewer003@company.com
+4
+4
+5
+Manajemen sangat baik dan transparan. Work-life balance bagus dengan flexible working. Gaji sesuai standar industri dengan bonus performance yang menarik.
+EMP2025003
+
+REV004
+PT Cyber Solutions Indonesia
+reviewer004@company.com
+2
+3
+2
+Work-life balance kurang bagus, sering overtime. Manajemen kurang komunikatif. Gaji standard tapi tidak ada kenaikan yang signifikan.
+EMP2025004
+
+REV005
+PT Global Tech Indonesia
+reviewer005@company.com
+5
+4
+5
+Perusahaan yang luar biasa! Manajemen peduli dengan karyawan. Work-life balance sangat dijaga. Gaji kompetitif dengan benefit kesehatan yang lengkap.
+EMP2025005
+
+REV006
+PT Teknologi Maju Indonesia
+reviewer006@company.com
+4
+3
+4
+Lingkungan kerja yang kondusif dan team yang solid. Work-life balance cukup baik. Gaji cukup kompetitif namun bisa lebih baik lagi.
+EMP2025006
+
+REV007
+PT Digital Solusi Nusantara
+reviewer007@company.com
+2
+2
+1
+Manajemen sangat buruk dan tidak peduli karyawan. Work-life balance jelek, sering dipaksa lembur. Gaji rendah dan tidak ada bonus.
+EMP2025007
+
+REV008
+PT Inovasi Teknologi Pratama
+reviewer008@company.com
+5
+5
+4
+Perusahaan terbaik yang pernah saya kerjakan. Work-life balance perfect, bisa WFH. Gaji sangat bagus dengan tunjangan lengkap. Manajemen profesional.
+EMP2025008
+
+REV009
+PT Cyber Solutions Indonesia
+reviewer009@company.com
+3
+4
+3
+Gaji cukup baik dan on-time. Work-life balance standard, kadang busy kadang santai. Manajemen cukup supportif tapi kurang tegas.
+EMP2025009
+
+REV010
+PT Global Tech Indonesia
+reviewer010@company.com
+4
+5
+5
+Manajemen sangat baik dan selalu mendengarkan feedback. Gaji di atas rata-rata industri. Work-life balance dijaga dengan baik, no toxic culture.
+EMP2025010
+
+REV011
+PT Teknologi Maju Indonesia
+reviewer011@company.com
+3
+4
+3
+Perusahaan yang stabil dengan gaji yang baik. Work-life balance kadang challenging di peak season. Manajemen cukup supportif.
+EMP2025011
+
+REV012
+PT Digital Solusi Nusantara
+reviewer012@company.com
+4
+3
+4
+Work-life balance bagus dengan kultur yang santai. Manajemen open-minded dan mau mendengar. Gaji standard sesuai pengalaman.
+EMP2025012
+
+REV013
+PT Inovasi Teknologi Pratama
+reviewer013@company.com
+2
+2
+3
+Work-life balance buruk, deadline sangat ketat. Gaji kurang kompetitif dibanding kompetitor. Manajemen cukup baik dalam komunikasi.
+EMP2025013
+
+REV014
+PT Cyber Solutions Indonesia
+reviewer014@company.com
+5
+4
+4
+Perusahaan yang bagus untuk career growth. Work-life balance excellent dengan remote working option. Gaji bagus dan ada bonus tahunan.
+EMP2025014
+
+REV015
+PT Global Tech Indonesia
+reviewer015@company.com
+3
+3
+4
+Manajemen cukup baik dan profesional. Work-life balance standard. Gaji sesuai dengan market rate, tidak lebih tidak kurang.
+EMP2025015
+
+REV016
+PT Teknologi Maju Indonesia
+reviewer016@company.com
+5
+5
+5
+Perfect workplace dengan team yang solid. Manajemen sangat supportif dan peduli work-life balance. Gaji sangat kompetitif dengan benefit prima.
+EMP2025016
+
+REV017
+PT Digital Solusi Nusantara
+reviewer017@company.com
+1
+2
+1
+Pengalaman terburuk. Manajemen toxic dan micromanagement parah. Work-life balance tidak ada, lembur terus. Gaji kecil.
+EMP2025017
+
+REV018
+PT Inovasi Teknologi Pratama
+reviewer018@company.com
+4
+5
+5
+Sangat puas bekerja di sini. Manajemen transparan dan fair. Gaji excellent dengan bonus yang menarik. Work-life balance terjaga baik.
+EMP2025018
+
+REV019
+PT Cyber Solutions Indonesia
+reviewer019@company.com
+3
+3
+2
+Work-life balance oke, tidak terlalu demanding. Gaji standard sesuai posisi. Manajemen kurang koordinasi antar departemen.
+EMP2025019
+
+REV020
+PT Global Tech Indonesia
+reviewer020@company.com
+5
+5
+5
+Perusahaan impian! Manajemen luar biasa supportif. Gaji dan benefit terbaik di industri. Work-life balance sangat dijaga, ada gym dan daycare.
+EMP2025020
+
+REV021
+PT Teknologi Maju Indonesia
+reviewer021@company.com
+2
+3
+2
+Work-life balance kurang baik di departemen tertentu. Manajemen playing favorite. Gaji cukup tapi tidak ada jenjang karir yang jelas.
+EMP2025021
+
+REV022
+PT Digital Solusi Nusantara
+reviewer022@company.com
+4
+4
+5
+Manajemen sangat approachable dan helpful. Work-life balance dijaga dengan flexi time. Gaji kompetitif dengan annual increment yang konsisten.
+EMP2025022
+
+REV023
+PT Inovasi Teknologi Pratama
+reviewer023@company.com
+3
+4
+3
+Gaji cukup menarik dengan benefit kesehatan. Work-life balance kadang challenging saat project deadline. Manajemen cukup supportif.
+EMP2025023
+
+REV024
+PT Cyber Solutions Indonesia
+reviewer024@company.com
+4
+3
+4
+Work-life balance bagus dengan kultur yang positif. Manajemen peduli dengan employee development. Gaji standard tapi ada training budget.
+EMP2025024
+
+REV025
+PT Global Tech Indonesia
+reviewer025@company.com
+2
+2
+3
+Gaji kurang memuaskan untuk beban kerja yang berat. Work-life balance buruk, sering weekend work. Manajemen lumayan komunikatif.
+EMP2025025
+
+REV026
+PT Teknologi Maju Indonesia
+reviewer026@company.com
+4
+5
+4
+Gaji sangat bagus dan selalu on time. Work-life balance terjaga dengan WFH option. Manajemen profesional dan fair dalam penilaian.
+EMP2025026
+
+REV027
+PT Digital Solusi Nusantara
+reviewer027@company.com
+5
+4
+5
+Sangat recommend perusahaan ini! Manajemen excellent dan peduli karyawan. Work-life balance perfect. Gaji bagus dengan bonus performance.
+EMP2025027
+
+REV028
+PT Inovasi Teknologi Pratama
+reviewer028@company.com
+1
+1
+2
+Sangat mengecewakan. Work-life balance tidak ada sama sekali. Gaji sangat rendah dan delay. Manajemen kurang kompeten.
+EMP2025028
+
+REV029
+PT Cyber Solutions Indonesia
+reviewer029@company.com
+4
+4
+5
+Manajemen sangat baik dan visioner. Work-life balance dijaga dengan strict working hours. Gaji kompetitif dengan ESOP program.
+EMP2025029
+
+REV030
+PT Global Tech Indonesia
+reviewer030@company.com
+3
+4
+3
+Gaji cukup bagus dan benefit standard. Work-life balance oke, tidak terlalu stressful. Manajemen cukup baik tapi bisa lebih decisive.
+EMP2025030
+
+REV031
+PT Teknologi Maju Indonesia
+reviewer031@company.com
+5
+4
+5
+Perusahaan yang sangat peduli dengan employee wellness. Manajemen transparent dan communicative. Work-life balance excellent. Gaji kompetitif.
+EMP2025031
+
+REV032
+PT Digital Solusi Nusantara
+reviewer032@company.com
+3
+3
+3
+Semua aspek cukup average. Work-life balance standard. Gaji sesuai market. Manajemen tidak buruk tapi tidak outstanding juga.
+EMP2025032
+
+REV033
+PT Inovasi Teknologi Pratama
+reviewer033@company.com
+5
+5
+5
+Absolutely amazing company! Manajemen world-class. Gaji dan benefit terbaik. Work-life balance dijaga dengan unlimited PTO.
+EMP2025033
+
+REV034
+PT Cyber Solutions Indonesia
+reviewer034@company.com
+2
+3
+2
+Work-life balance kurang baik, banyak pressure. Gaji cukup tapi tidak ada bonus. Manajemen kurang supportif untuk career development.
+EMP2025034
+
+REV035
+PT Global Tech Indonesia
+reviewer035@company.com
+4
+5
+4
+Gaji sangat memuaskan dengan annual bonus yang konsisten. Manajemen baik dan peduli employee satisfaction. Work-life balance dijaga.
+EMP2025035
+
+REV036
+PT Teknologi Maju Indonesia
+reviewer036@company.com
+3
+2
+3
+Work-life balance oke tapi gaji di bawah ekspektasi. Manajemen cukup baik dalam handling conflict. Perlu improve compensation package.
+EMP2025036
+
+REV037
+PT Digital Solusi Nusantara
+reviewer037@company.com
+4
+5
+4
+Gaji excellent dengan stock options. Work-life balance bagus dengan hybrid working. Manajemen profesional dan fair.
+EMP2025037
+
+REV038
+PT Inovasi Teknologi Pratama
+reviewer038@company.com
+2
+3
+2
+Manajemen kurang koordinasi dan sering berubah keputusan. Work-life balance kurang terjaga. Gaji standard tapi benefit minim.
+EMP2025038
+
+REV039
+PT Cyber Solutions Indonesia
+reviewer039@company.com
+5
+5
+5
+Best company ever! Manajemen sangat peduli dan inspiring. Gaji top-tier dengan benefit lengkap. Work-life balance perfect dengan 4-day work week.
+EMP2025039
+
+REV040
+PT Global Tech Indonesia
+reviewer040@company.com
+3
+3
+4
+Manajemen cukup baik dan approachable. Work-life balance standard dengan occasional overtime. Gaji sesuai industri standard.
+EMP2025040
+
+REV041
+PT Teknologi Maju Indonesia
+reviewer041@company.com
+4
+4
+5
+Manajemen sangat supportif untuk learning and development. Work-life balance bagus dengan flexible schedule. Gaji kompetitif dengan bonus project.
+EMP2025041
+
+REV042
+PT Digital Solusi Nusantara
+reviewer042@company.com
+1
+1
+1
+Worst experience ever. Manajemen toxic dan unprofessional. Work-life balance tidak ada. Gaji sangat rendah dan sering telat.
+EMP2025042
+
+REV043
+PT Inovasi Teknologi Pratama
+reviewer043@company.com
+4
+5
+4
+Gaji sangat bagus dan competitive di industri. Manajemen baik dan open to feedback. Work-life balance terjaga dengan remote option.
+EMP2025043
+
+REV044
+PT Cyber Solutions Indonesia
+reviewer044@company.com
+3
+4
+3
+Gaji cukup menarik dengan regular increment. Work-life balance oke, tidak terlalu demanding. Manajemen cukup supportif.
+EMP2025044
+
+REV045
+PT Global Tech Indonesia
+reviewer045@company.com
+5
+4
+5
+Excellent company dengan kultur kerja yang positif. Manajemen very supportive dan transparent. Work-life balance dijaga ketat. Gaji bagus.
+EMP2025045
+
+REV046
+PT Teknologi Maju Indonesia
+reviewer046@company.com
+2
+2
+2
+Semua aspek kurang memuaskan. Work-life balance buruk dengan overtime culture. Gaji rendah. Manajemen kurang peduli karyawan.
+EMP2025046
+
+REV047
+PT Digital Solusi Nusantara
+reviewer047@company.com
+5
+5
+5
+Dream company dengan everything perfect! Manajemen inspiring dan peduli. Gaji top-tier. Work-life balance excellent dengan wellness program.
+EMP2025047
+
+REV048
+PT Inovasi Teknologi Pratama
+reviewer048@company.com
+3
+3
+4
+Manajemen cukup baik dan organized. Work-life balance standard. Gaji sesuai dengan posisi dan experience, tidak terlalu tinggi.
+EMP2025048
+
+REV049
+PT Cyber Solutions Indonesia
+reviewer049@company.com
+4
+5
+4
+Gaji sangat competitive dengan benefit yang lengkap. Manajemen professional dan fair. Work-life balance dijaga dengan no-meeting Friday.
+EMP2025049
+
+REV050
+PT Global Tech Indonesia
+reviewer050@company.com
+2
+3
+2
+Work-life balance kurang baik dengan high pressure environment. Gaji cukup tapi tidak sebanding dengan workload. Manajemen kurang responsive.
+EMP2025050
