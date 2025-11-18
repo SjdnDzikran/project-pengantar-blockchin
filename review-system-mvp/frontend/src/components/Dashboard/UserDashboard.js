@@ -1,0 +1,157 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { reviewAPI, authAPI } from '../../services/api';
+import useAuthStore from '../../store/authStore';
+
+function UserDashboard() {
+    const [profile, setProfile] = useState(null);
+    const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const { clearAuth, user } = useAuthStore();
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    const fetchDashboardData = async () => {
+        try {
+            const [profileRes, reviewsRes] = await Promise.all([
+                authAPI.getProfile(),
+                reviewAPI.getUserReviews()
+            ]);
+
+            setProfile(profileRes.data.data);
+            setReviews(reviewsRes.data.data);
+        } catch (error) {
+            toast.error('Failed to fetch dashboard data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
+        clearAuth();
+        toast.success('Logged out successfully');
+        navigate('/login');
+    };
+
+    const renderStars = (rating) => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <span key={i} className={`star ${i <= rating ? 'filled' : ''}`}>
+                    ★
+                </span>
+            );
+        }
+        return stars;
+    };
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString();
+    };
+
+    if (loading) {
+        return <div className="loading">Loading dashboard...</div>;
+    }
+
+    return (
+        <div>
+            <nav className="navbar">
+                <Link to="/" className="navbar-brand">Company Review System</Link>
+                <div className="navbar-links">
+                    <Link to="/companies">Companies</Link>
+                    <Link to="/dashboard">Dashboard</Link>
+                    <button className="btn btn-secondary" onClick={handleLogout}>Logout</button>
+                </div>
+            </nav>
+
+            <div className="container">
+                <h1 style={{ marginBottom: '1.5rem' }}>My Dashboard</h1>
+
+                {profile && (
+                    <div className="card" style={{ marginBottom: '2rem' }}>
+                        <h2 style={{ marginBottom: '1rem' }}>Profile</h2>
+                        <div style={{ display: 'grid', gap: '0.5rem' }}>
+                            <div>
+                                <strong>Name:</strong> {profile.fullName || 'Not set'}
+                            </div>
+                            <div>
+                                <strong>Email:</strong> {profile.email}
+                            </div>
+                            <div>
+                                <strong>Member Since:</strong> {formatDate(profile.createdAt)}
+                            </div>
+                            <div>
+                                <strong>Total Reviews:</strong> {profile.reviewCount}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h2>My Reviews ({reviews.length})</h2>
+                    <Link to="/companies" className="btn btn-primary">
+                        Write New Review
+                    </Link>
+                </div>
+
+                {reviews.length === 0 ? (
+                    <div className="card">
+                        <p style={{ textAlign: 'center', color: '#64748b' }}>
+                            You haven't written any reviews yet.
+                        </p>
+                        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                            <Link to="/companies" className="btn btn-primary">
+                                Browse Companies
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    <div>
+                        {reviews.map((review) => (
+                            <div key={review.review_id} className="card">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                    <h3>{review.company_name}</h3>
+                                    <div className="rating-stars" style={{ fontSize: '1.2rem' }}>
+                                        {renderStars(review.rating)}
+                                    </div>
+                                </div>
+
+                                {review.review_text && (
+                                    <p style={{ color: '#475569', marginBottom: '1rem' }}>
+                                        {review.review_text}
+                                    </p>
+                                )}
+
+                                <div style={{ display: 'grid', gap: '0.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>
+                                    <div>Review ID: {review.review_id}</div>
+                                    {review.blockchain_tx_hash && (
+                                        <div>
+                                            Blockchain TX: {review.blockchain_tx_hash.substring(0, 20)}...
+                                        </div>
+                                    )}
+                                    <div>Submitted: {formatDate(review.review_date)}</div>
+                                </div>
+
+                                <div style={{ marginTop: '1rem' }}>
+                                    <Link
+                                        to={`/companies/${review.company_id}`}
+                                        className="btn btn-secondary"
+                                        style={{ marginRight: '0.5rem' }}
+                                    >
+                                        View Company
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default UserDashboard;
