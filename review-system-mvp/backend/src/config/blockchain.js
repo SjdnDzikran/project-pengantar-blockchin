@@ -77,8 +77,8 @@ class BlockchainService {
 
             return {
                 transactionHash: receipt.transactionHash,
-                blockNumber: receipt.blockNumber,
-                gasUsed: receipt.gasUsed
+                blockNumber: Number(receipt.blockNumber),
+                gasUsed: Number(receipt.gasUsed)
             };
         } catch (error) {
             console.error('Error storing review on blockchain:', error);
@@ -97,9 +97,9 @@ class BlockchainService {
                 companyId: review.companyId,
                 reviewerHash: review.reviewerHash,
                 reviewHash: review.reviewHash,
-                rating: parseInt(review.rating),
+                rating: Number(review.rating),
                 employmentProof: review.employmentProof,
-                timestamp: parseInt(review.timestamp)
+                timestamp: Number(review.timestamp)
             };
         } catch (error) {
             console.error('Error fetching review from blockchain:', error);
@@ -142,7 +142,7 @@ class BlockchainService {
 
         try {
             const count = await this.contract.methods.getReviewCount().call();
-            return parseInt(count);
+            return Number(count);
         } catch (error) {
             console.error('Error getting review count:', error);
             throw error;

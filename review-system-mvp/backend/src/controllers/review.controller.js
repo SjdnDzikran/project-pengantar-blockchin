@@ -119,8 +119,8 @@ async function submitReview(req, res) {
             data: {
                 reviewId,
                 transactionHash: blockchainResult.transactionHash,
-                blockNumber: blockchainResult.blockNumber,
-                gasUsed: blockchainResult.gasUsed,
+                blockNumber: blockchainResult.blockNumber.toString(),
+                gasUsed: blockchainResult.gasUsed.toString(),
                 reviewHash
             }
         });
@@ -215,7 +215,7 @@ async function verifyReview(req, res) {
                 blockchain: {
                     reviewHash: blockchainReview.reviewHash,
                     rating: blockchainReview.rating,
-                    timestamp: blockchainReview.timestamp,
+                    timestamp: blockchainReview.timestamp.toString(),
                     companyId: blockchainReview.companyId
                 }
             }
