@@ -29,7 +29,7 @@ def diagnose():
 
     # 2. Check ABI file
     print("\n[2/6] Checking ABI file...")
-    abi_path = '../blockchain/build/CompanyReviewLedger.abi'
+    abi_path = 'blockchain/build/CompanyReviewLedger.abi'
     if not os.path.exists(abi_path):
         print(f"  ✗ ABI not found at {abi_path}")
         return False

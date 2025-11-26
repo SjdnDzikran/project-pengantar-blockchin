@@ -72,7 +72,6 @@ geth \
     --password "$DATA_DIR/password.txt" \
     --mine \
     --miner.etherbase "0x$VALIDATOR_ADDRESS" \
-    --miner.threads 1 \
     --nodiscover \
     --maxpeers 0 \
     --verbosity 3 \

@@ -24,7 +24,7 @@ def verify_review(review_id):
 
     # Load contract ABI
     try:
-        with open('../blockchain/build/CompanyReviewLedger.abi', 'r') as f:
+        with open('./blockchain/build/CompanyReviewLedger.abi', 'r') as f:
             abi = json.load(f)
     except FileNotFoundError:
         print("✗ Contract ABI not found")
@@ -33,7 +33,7 @@ def verify_review(review_id):
 
     # Load contract address from env or use default
     import os
-    contract_address = os.getenv('CONTRACT_ADDRESS', '0xC341bbFbaCbcf8119282e3820E7A4A8f8CA35bCA')
+    contract_address = os.getenv('CONTRACT_ADDRESS', '0x9B5fF6De6F8C63A282Ea7Bf693C5ac384ce267d1')
 
     contract = w3.eth.contract(address=contract_address, abi=abi)
 
@@ -41,20 +41,20 @@ def verify_review(review_id):
     print()
 
     # Check if review exists
-    try:
-        exists = contract.functions.reviewExists(review_id).call()
-        if not exists:
-            print(f"✗ Review '{review_id}' not found on blockchain")
-            return False
-    except Exception as e:
-        print(f"✗ Error checking review: {e}")
-        return False
+    # try:
+    #     exists = contract.functions.reviewExists(review_id).call()
+    #     if not exists:
+    #         print(f"✗ Review '{review_id}' not found on blockchain")
+    #         return False
+    # except Exception as e:
+    #     print(f"✗ Error checking review: {e}")
+    #     return False
 
     # Get review
     try:
         review = contract.functions.getReview(review_id).call()
     except Exception as e:
-        print(f"✗ Error fetching review: {e}")
+        print(f"✗ Error fetching revihew: {e}")
         return False
 
     # Parse review data
