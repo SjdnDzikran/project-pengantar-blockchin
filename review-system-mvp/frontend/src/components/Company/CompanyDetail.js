@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { companyAPI } from '../../services/api';
+import { companyAPI, reviewAPI } from '../../services/api';
 import useAuthStore from '../../store/authStore';
 
 function CompanyDetail() {
@@ -10,6 +10,8 @@ function CompanyDetail() {
     const [company, setCompany] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [verifying, setVerifying] = useState({});
+    const [verificationResults, setVerificationResults] = useState({});
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
     useEffect(() => {
@@ -29,6 +31,27 @@ function CompanyDetail() {
             toast.error('Failed to fetch company details');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerifyReview = async (reviewId) => {
+        setVerifying({ ...verifying, [reviewId]: true });
+
+        try {
+            const response = await reviewAPI.verify(reviewId);
+            const result = response.data.data;
+
+            setVerificationResults({ ...verificationResults, [reviewId]: result });
+
+            if (result.isValid) {
+                toast.success('✓ Review verified on blockchain!');
+            } else {
+                toast.error('✗ Review hash mismatch!');
+            }
+        } catch (error) {
+            toast.error('Failed to verify review: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setVerifying({ ...verifying, [reviewId]: false });
         }
     };
 
@@ -188,6 +211,53 @@ function CompanyDetail() {
                                             <strong>Timestamp:</strong> {review.timestamp} ({formatDate(review.timestamp)})
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Verification Results */}
+                                {verificationResults[review.review_id] && (
+                                    <div style={{
+                                        background: verificationResults[review.review_id].isValid ? '#dcfce7' : '#fee2e2',
+                                        padding: '0.75rem',
+                                        borderRadius: '4px',
+                                        marginTop: '1rem',
+                                        fontSize: '0.875rem'
+                                    }}>
+                                        <div style={{
+                                            fontWeight: 'bold',
+                                            marginBottom: '0.5rem',
+                                            color: verificationResults[review.review_id].isValid ? '#166534' : '#991b1b'
+                                        }}>
+                                            {verificationResults[review.review_id].isValid ? '✓ Blockchain Verification Passed' : '✗ Blockchain Verification Failed'}
+                                        </div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>
+                                            <div><strong>Database Hash:</strong></div>
+                                            <div style={{ wordBreak: 'break-all', marginBottom: '0.5rem' }}>
+                                                {verificationResults[review.review_id].database.reviewHash}
+                                            </div>
+                                            <div><strong>Blockchain Hash:</strong></div>
+                                            <div style={{ wordBreak: 'break-all' }}>
+                                                {verificationResults[review.review_id].blockchain.reviewHash}
+                                            </div>
+                                            <div style={{ marginTop: '0.5rem' }}>
+                                                <strong>Blockchain Rating:</strong> {verificationResults[review.review_id].blockchain.rating}/5
+                                            </div>
+                                            <div>
+                                                <strong>Blockchain Timestamp:</strong> {new Date(parseInt(verificationResults[review.review_id].blockchain.timestamp) * 1000).toLocaleString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Verify Button */}
+                                <div style={{ marginTop: '1rem' }}>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => handleVerifyReview(review.review_id)}
+                                        disabled={verifying[review.review_id]}
+                                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                                    >
+                                        {verifying[review.review_id] ? 'Verifying...' : '🔍 Verify on Blockchain'}
+                                    </button>
                                 </div>
                             </div>
                         ))}
