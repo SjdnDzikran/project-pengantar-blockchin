@@ -100,6 +100,24 @@ function CompanyDetail() {
                         </span>
                     </div>
 
+                    {/* Blockchain Data Section */}
+                    <div style={{
+                        background: '#f8fafc',
+                        padding: '1rem',
+                        borderRadius: '6px',
+                        marginBottom: '1.5rem',
+                        fontSize: '0.875rem'
+                    }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#1e293b' }}>
+                            🔗 Blockchain Data
+                        </div>
+                        <div style={{ fontFamily: 'monospace', color: '#475569', wordBreak: 'break-all' }}>
+                            <div style={{ marginBottom: '0.25rem' }}>
+                                <strong>Company Hash:</strong> {company.company_id}
+                            </div>
+                        </div>
+                    </div>
+
                     {isAuthenticated ? (
                         <button
                             className="btn btn-primary"
@@ -134,13 +152,42 @@ function CompanyDetail() {
                                 </div>
 
                                 {review.review_text && (
-                                    <p style={{ color: '#475569', marginTop: '0.5rem' }}>
+                                    <p style={{ color: '#475569', marginTop: '0.5rem', marginBottom: '1rem' }}>
                                         {review.review_text}
                                     </p>
                                 )}
 
-                                <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#94a3b8' }}>
-                                    Review ID: {review.review_id}
+                                {/* Blockchain Details */}
+                                <div style={{
+                                    background: '#f8fafc',
+                                    padding: '0.75rem',
+                                    borderRadius: '4px',
+                                    marginTop: '1rem',
+                                    fontSize: '0.8rem',
+                                    fontFamily: 'monospace'
+                                }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', fontFamily: 'sans-serif', color: '#1e293b' }}>
+                                        🔗 Blockchain Data
+                                    </div>
+                                    <div style={{ color: '#64748b', display: 'grid', gap: '0.25rem' }}>
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Review ID:</strong> {review.review_id}
+                                        </div>
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Company Hash:</strong> {review.company_id}
+                                        </div>
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Reviewer Hash:</strong> {review.reviewer_hash}
+                                        </div>
+                                        {review.employment_proof_hash && (
+                                            <div style={{ wordBreak: 'break-all' }}>
+                                                <strong>Employment Proof:</strong> {review.employment_proof_hash}
+                                            </div>
+                                        )}
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Timestamp:</strong> {review.timestamp} ({formatDate(review.timestamp)})
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         ))}

@@ -10,6 +10,7 @@ function ReviewForm() {
     const [isVerified, setIsVerified] = useState(false);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [submissionResult, setSubmissionResult] = useState(null);
     const [formData, setFormData] = useState({
         rating: 5,
         reviewText: '',
@@ -81,11 +82,10 @@ function ReviewForm() {
                 employeeId: formData.employeeId
             });
 
-            toast.success(`Review submitted successfully! Transaction: ${response.data.data.transactionHash.substring(0, 10)}...`);
-            navigate(`/companies/${companyId}`);
+            toast.success('Review submitted successfully to blockchain!');
+            setSubmissionResult(response.data.data);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to submit review');
-        } finally {
             setSubmitting(false);
         }
     };
@@ -136,9 +136,96 @@ function ReviewForm() {
                     <Link to={`/companies/${companyId}`}>← Back to {company.company_name}</Link>
                 </div>
 
-                <h1 style={{ marginBottom: '1.5rem' }}>Write a Review</h1>
+                <h1 style={{ marginBottom: '1.5rem' }}>
+                    {submissionResult ? 'Review Submitted!' : 'Write a Review'}
+                </h1>
 
-                {showVerification ? (
+                {submissionResult ? (
+                    <div className="card">
+                        <div style={{ padding: '1rem', background: '#dcfce7', borderRadius: '6px', marginBottom: '1.5rem' }}>
+                            <p style={{ color: '#166534', margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>
+                                ✓ Review successfully stored on blockchain!
+                            </p>
+                        </div>
+
+                        <h2 style={{ marginBottom: '1rem' }}>🔗 Blockchain Transaction Details</h2>
+
+                        <div style={{
+                            background: '#f8fafc',
+                            padding: '1rem',
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            fontFamily: 'monospace',
+                            marginBottom: '1.5rem'
+                        }}>
+                            <div style={{ display: 'grid', gap: '0.75rem', color: '#475569' }}>
+                                <div style={{ wordBreak: 'break-all' }}>
+                                    <strong style={{ fontFamily: 'sans-serif' }}>Review ID:</strong>
+                                    <div style={{ marginTop: '0.25rem', color: '#64748b' }}>
+                                        {submissionResult.reviewId}
+                                    </div>
+                                </div>
+
+                                <div style={{ wordBreak: 'break-all' }}>
+                                    <strong style={{ fontFamily: 'sans-serif' }}>Transaction Hash:</strong>
+                                    <div style={{ marginTop: '0.25rem', color: '#2563eb' }}>
+                                        {submissionResult.transactionHash}
+                                    </div>
+                                </div>
+
+                                <div style={{ wordBreak: 'break-all' }}>
+                                    <strong style={{ fontFamily: 'sans-serif' }}>Block Number:</strong>
+                                    <div style={{ marginTop: '0.25rem', color: '#64748b' }}>
+                                        {submissionResult.blockNumber}
+                                    </div>
+                                </div>
+
+                                <div style={{ wordBreak: 'break-all' }}>
+                                    <strong style={{ fontFamily: 'sans-serif' }}>Gas Used:</strong>
+                                    <div style={{ marginTop: '0.25rem', color: '#64748b' }}>
+                                        {submissionResult.gasUsed}
+                                    </div>
+                                </div>
+
+                                <div style={{ wordBreak: 'break-all' }}>
+                                    <strong style={{ fontFamily: 'sans-serif' }}>Review Hash:</strong>
+                                    <div style={{ marginTop: '0.25rem', color: '#64748b' }}>
+                                        {submissionResult.reviewHash}
+                                    </div>
+                                </div>
+
+                                <div style={{ wordBreak: 'break-all' }}>
+                                    <strong style={{ fontFamily: 'sans-serif' }}>Company Hash:</strong>
+                                    <div style={{ marginTop: '0.25rem', color: '#64748b' }}>
+                                        {companyId}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ background: '#fef3c7', padding: '1rem', borderRadius: '6px', marginBottom: '1.5rem' }}>
+                            <p style={{ color: '#92400e', margin: 0, fontSize: '0.875rem' }}>
+                                <strong>📋 How to verify manually:</strong><br/>
+                                Use these hashes to query the blockchain directly using the smart contract's getReview() function with your Review ID.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <Link
+                                to={`/companies/${companyId}`}
+                                className="btn btn-primary"
+                            >
+                                View Company Reviews
+                            </Link>
+                            <Link
+                                to="/dashboard"
+                                className="btn btn-secondary"
+                            >
+                                Go to Dashboard
+                            </Link>
+                        </div>
+                    </div>
+                ) : showVerification ? (
                     <div className="card">
                         <h2 style={{ marginBottom: '1rem' }}>Verify Employment</h2>
                         <p style={{ marginBottom: '1rem', color: '#64748b' }}>

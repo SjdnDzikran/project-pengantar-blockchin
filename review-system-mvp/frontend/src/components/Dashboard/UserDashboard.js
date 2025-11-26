@@ -126,14 +126,49 @@ function UserDashboard() {
                                     </p>
                                 )}
 
-                                <div style={{ display: 'grid', gap: '0.25rem', fontSize: '0.875rem', color: '#94a3b8' }}>
-                                    <div>Review ID: {review.review_id}</div>
-                                    {review.blockchain_tx_hash && (
-                                        <div>
-                                            Blockchain TX: {review.blockchain_tx_hash.substring(0, 20)}...
+                                {/* Blockchain Details */}
+                                <div style={{
+                                    background: '#f8fafc',
+                                    padding: '0.75rem',
+                                    borderRadius: '4px',
+                                    marginTop: '1rem',
+                                    fontSize: '0.8rem',
+                                    fontFamily: 'monospace'
+                                }}>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', fontFamily: 'sans-serif', color: '#1e293b' }}>
+                                        🔗 Blockchain Data
+                                    </div>
+                                    <div style={{ color: '#64748b', display: 'grid', gap: '0.25rem' }}>
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Review ID:</strong> {review.review_id}
                                         </div>
-                                    )}
-                                    <div>Submitted: {formatDate(review.review_date)}</div>
+                                        {review.blockchain_tx_hash && (
+                                            <div style={{ wordBreak: 'break-all' }}>
+                                                <strong>Transaction Hash:</strong> {review.blockchain_tx_hash}
+                                            </div>
+                                        )}
+                                        {review.block_number && (
+                                            <div style={{ wordBreak: 'break-all' }}>
+                                                <strong>Block Number:</strong> {review.block_number}
+                                            </div>
+                                        )}
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Company Hash:</strong> {review.company_id}
+                                        </div>
+                                        {review.reviewer_hash && (
+                                            <div style={{ wordBreak: 'break-all' }}>
+                                                <strong>Your Reviewer Hash:</strong> {review.reviewer_hash}
+                                            </div>
+                                        )}
+                                        {review.employment_proof_hash && (
+                                            <div style={{ wordBreak: 'break-all' }}>
+                                                <strong>Employment Proof:</strong> {review.employment_proof_hash}
+                                            </div>
+                                        )}
+                                        <div style={{ wordBreak: 'break-all' }}>
+                                            <strong>Submitted:</strong> {formatDate(review.review_date)}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div style={{ marginTop: '1rem' }}>
