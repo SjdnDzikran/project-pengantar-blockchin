@@ -1,0 +1,4 @@
+node_modules
+review-system-mvp/*/node_modules
+review-system-mvp/logs
+review-system-mvp/*/.env
