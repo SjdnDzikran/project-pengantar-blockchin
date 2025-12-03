@@ -1,0 +1,125 @@
+Demo running blockchain network and simple web3 application.
+This demo run on most Linux operated machines, including those on raspberry pi single board computers. It probably also runs on Windows Subsystem for Linux (WSL). 
+
+Software requirements:
+geth: Version 1.13.15-stable
+solc: Version 0.8.26+commit.8a97fa7a.Linux.g++
+python: Version 3.12.3
+evm-version: london
+Internet connection is required just in case you need to install some python modules such as web3 and hash.
+
+1. Prepare data directory and blockchain accounts
+
+prepare data directory (or folder in Windows world)
+mkdir data
+
+We need to create at least 3 accounts to support this demo. Create ones with account new geth command.
+
+geth --datadir data account new
+
+It asks you to enter a password for each account creation. For simplicity, you can use the same password for the them.
+
+Result something like these:
+account 1
+Public address of the key:   0xd9232DB885e7db72eb0e55c25622e7C9413c4350
+Path of the secret key file: data/keystore/UTC--2025-10-20T03-50-24.444331003Z--d9232db885e7db72eb0e55c25622e7c9413c4350
+account 2
+Public address of the key:   0xFDC7B0C786859d4b1C8440c7f3cdCEfe84BAa4F2
+Path of the secret key file: data/keystore/UTC--2025-10-20T03-51-48.895346919Z--fdc7b0c786859d4b1c8440c7f3cdcefe84baa4f2
+account 3
+Public address of the key:   0x2C8983281C3AAb992CdFB3Eb5A4Afe2C139AeaE1
+Path of the secret key file: data/keystore/UTC--2025-10-20T03-52-08.409229582Z--2c8983281c3aab992cdfb3eb5a4afe2c139aeae1
+
+2. Running Blockchain Clients
+
+Blockchain network has no server. Clients are connected directly or indirectly to all other clients of the same network. They make a network of client-server interconnection synchronizing blockchain data.
+
+Edit the blockchain specification file: genesis.json
+
+Replace account address at the allocation section with account 1 address
+Replace the part of extradata that looks like address with account3 address withput 0x prefix.
+
+Prepare the very first block:
+geth --datadir data init genesis.json
+
+run the first blockchain client (it will be one of the blockchain network node)
+replace the miner etherbase address with account 3 address. Unlock the same address.
+geth --datadir data --mine --miner.etherbase 0x2C8983281C3AAb992CdFB3Eb5A4Afe2C139AeaE1 --unlock 0x2C8983281C3AAb992CdFB3Eb5A4Afe2C139AeaE1
+
+The client will emit client status log all the time. Enter the account creation password aftar you see Password: prompt. Just enter the password even when the password prompt has been overwitten with log messages. The --mine parameter tell the client to do the mining.
+
+Scroll up/down to look for log message that shows some thing like enode:// line. Save it as the id of the first client. I see the following when making the experiment.
+enode://09b4165470173aae6f7dc8211d7439881eeb7f0c5e7d85a3c837280e9591811a6989ff646184195957a6ddd6d047e8caeab6954edacd6d0db8db92fcf381fc40@127.0.0.1:30303
+
+Prepare for running the second client. Open second command line terminal window.
+
+mkdir data2
+geth --datadir data2 init genesis.json
+All client processes of the same network must initialized with the same genesisljson.
+
+Run the second client:
+geth --datadir data2 --port 30305 --authrpc.port 8552 --http --bootnodes enode://09b4165470173aae6f7dc8211d7439881eeb7f0c5e7d85a3c837280e9591811a6989ff646184195957a6ddd6d047e8caeab6954edacd6d0db8db92fcf381fc40@127.0.0.1:30303
+replace bootnodes enode with the enode line from the first client.
+
+If it sends log message something like the following, it means the -http works.
+HTTP server started endpoint=127.0.0.1:8545 ...
+The 8545 is the http default port number.
+
+The following log messages should show informations about data sychronization with the first node.
+
+3. Install Smart Contract
+
+This demo run smart contract for depositing some certificate data on the blockchain. Smart contract is a piece of software to be installed on the blockchain. The program can be written in Java, C, or the most popular for it is Solidity.
+
+I have prepared the contract demo. Read certificate_registry.sol carefully to learn how it works.
+
+The compoler, solc, is use to build 2 files: xxx.abi and xxx.bin. The following solc command will compile certificate_registry.sol into the two files saved in build folder.
+
+solc --evm-version london certificate_registry.sol --abi --bin -o build
+ls build will show
+CertificateRegistry.abi  CertificateRegistry.bin
+
+We need to deploy the contract to the network. We can use http protocol that is open on the second client. Edit deploy_certificate_registry.py, replace address and utc file path with corresponding data for account 1.
+
+python deploy_certificate_registry.py 
+if everything goes well, it will return contract address
+Contract deployed at address: 0x3bfC2cbB5cB3F2d0624Fb69cB38715cB6c29E6eb
+
+3. Web3 Application
+
+This demo show how to protect certificates by depositing their textual data on the blockchain. To save computing cost, we are not depositing the whole plain texts but only their hash values. For the demo, certificate text data is saved on the certificate.txt file.
+
+Test the contract by depositing some certificate data written in certificate.txt file. Edit deposit_certificate.py, replace address and utc file path with the ones from account 1. Replace the contract address with your contract address from the contract deployment. Run the deposit program.
+
+python deposit_certificate.py
+it will show something like the the following among other messages
+Transaction confirmed in block 72
+
+Edit verify_certificate.py, replace the contract address with your contract address. Run the verification program.
+
+Python verify_certificate.py
+It should output something like:
+032/M/Webinar/MISI/2025 | Avinanta Tarigan | Dosen Sistem Informasi|Universitas Gunadarma | Keamanan Sistem Digital di Era Komputer Kuantum | Jakarta, 3 Oktober 2025
+Certificate hash: 331fe593f8a5a57d4fb623e4528dec4e2d880458740d030a356f7293e5b8a2e1
+Certificate found. Timestamp: 2025-10-22 15:17:09
+
+Edit the certificate.txt, make small change such as adding or deleting one character. Do the verification again. 
+
+032/M/Webinar/MISI/2025 | Avinanta Tarigan | Dosen Sistem Informasi|Universitas Gunadarma | Keamanan Sistem Digital di Era Komputer Kuantum | Jakarta, 3 Oktober 2025.
+Certificate hash: 621d54cfa39ce4c3ce57ff42e9e96abc595b8883ce686e659f8be3a726054cea
+Certificate not found or error: name 'readable' is not defined
+
+
+Notes:
+
+This demo folder contains snapshot of running blockchain network. You can skip most of the instruction above and run the following command. Open command line window, change directory to this one and run the following command.
+
+geth --datadir data --mine --miner.etherbase 0x2C8983281C3AAb992CdFB3Eb5A4Afe2C139AeaE1 --unlock 0x2C8983281C3AAb992CdFB3Eb5A4Afe2C139AeaE1
+type 123<enter> when you see "Password:"
+
+Open second window and run the following command line
+geth --datadir data2 --port 30305 --authrpc.port 8552 --http --bootnodes enode://09b4165470173aae6f7dc8211d7439881eeb7f0c5e7d85a3c837280e9591811a6989ff646184195957a6ddd6d047e8caeab6954edacd6d0db8db92fcf381fc40@127.0.0.1:30303
+
+After seeing synchronizing log message on the second window that show imported blocknumber that should be about one or two step behind number of the newest block created by the the first client, you can proceed to the last section "Web3 Application"
+
+Should you like get the feeling of building blockchain network, writing smart contract, and run some application, please delete the data, data2 and build directories, then follow the instruction from section 1. It will be a bit more challanging.

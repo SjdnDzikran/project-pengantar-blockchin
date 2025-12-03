@@ -8,12 +8,36 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 MIGRATION_FILE="$PROJECT_ROOT/backend/database/migrations/001_initial_schema.sql"
+ENV_FILE="$PROJECT_ROOT/backend/.env"
 
 echo "=========================================="
 echo "Database Initialization"
 echo "=========================================="
 
-# Default PostgreSQL connection parameters
+# Load environment variables from backend .env file if it exists
+if [ -f "$ENV_FILE" ]; then
+    echo ""
+    echo "Loading configuration from: $ENV_FILE"
+    export $(grep -v '^#' "$ENV_FILE" | grep -E '^DB_' | xargs)
+fi
+
+# Parse connection string if DB_HOST is a full PostgreSQL URL
+if [[ "$DB_HOST" == postgresql://* ]] || [[ "$DB_HOST" == postgres://* ]]; then
+    echo ""
+    echo "⚠ Remote PostgreSQL connection string detected!"
+    echo "  Skipping local database initialization."
+    echo "  Make sure your remote database is already set up with the schema."
+    echo ""
+    echo "To initialize your remote database, run the migration manually:"
+    echo "  psql \"$DB_HOST\" -f $MIGRATION_FILE"
+    echo ""
+    echo "Or install postgresql-client and run this script again:"
+    echo "  sudo apt-get install postgresql-client"
+    echo ""
+    exit 0
+fi
+
+# Default PostgreSQL connection parameters (fallback if not in .env)
 DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-company_review_db}

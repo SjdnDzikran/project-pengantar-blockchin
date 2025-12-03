@@ -1,0 +1,32 @@
+========================================
+BLOCKCHAIN ACCOUNTS INFORMATION
+========================================
+
+Password for all accounts: admin123
+
+Account 1 (Deployer - has initial balance):
+Address: 0x16F633126d81A620F48fF64CE55de718f26900aF
+Keystore: UTC--2025-12-03T01-38-28.194286920Z--16f633126d81a620f48ff64ce55de718f26900af
+Role: Contract deployer, has 50000 ETH initial balance
+
+Account 2:
+Address: 0xE33Fb5Ee6e1829Dc0c9E293F916F3C0696C1Fd4D
+Keystore: UTC--2025-12-03T01-38-37.345570743Z--e33fb5ee6e1829dc0c9e293f916f3c0696c1fd4d
+Role: Spare account
+
+Account 3 (Validator/Miner):
+Address: 0x75319fc77fe21D5E741c8471a13095af3Bb398A7
+Keystore: UTC--2025-12-03T01-38-46.236804464Z--75319fc77fe21d5e741c8471a13095af3bb398a7
+Role: Block validator and miner, configured in genesis.json extradata
+
+========================================
+USAGE NOTES
+========================================
+
+- All accounts were created with password: admin123
+- This password is stored in: blockchain/data/password.txt
+- Account 1 is used for deploying smart contracts
+- Account 3 is used for mining/validating blocks
+- The genesis.json has been configured with these accounts
+
+When deploying contract, enter: admin123

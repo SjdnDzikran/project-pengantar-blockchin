@@ -7,6 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+GETH="$HOME/UGM/pengantar-blockchain/myblockchain/geth-linux-amd64-1.13.15-c5ba367e/geth"
 
 echo ""
 echo "=========================================="
@@ -30,9 +31,13 @@ echo ""
 
 MISSING_DEPS=0
 
-if ! command_exists geth; then
-    echo "✗ Geth not found"
-    MISSING_DEPS=1
+if ! command_exists "$GETH"; then
+    if [ ! -f "$GETH" ]; then
+        echo "✗ Geth not found at $GETH"
+        MISSING_DEPS=1
+    else
+        echo "✓ Geth installed (custom path)"
+    fi
 else
     echo "✓ Geth installed"
 fi
@@ -51,11 +56,24 @@ else
     echo "✓ npm installed ($(npm --version))"
 fi
 
-if ! command_exists psql; then
-    echo "✗ PostgreSQL not found"
-    MISSING_DEPS=1
+# Check if using remote PostgreSQL (skip local psql requirement)
+ENV_FILE="$PROJECT_ROOT/backend/.env"
+if [ -f "$ENV_FILE" ]; then
+    DB_HOST=$(grep -E '^DB_HOST=' "$ENV_FILE" | cut -d '=' -f2- | tr -d '"')
+    if [[ "$DB_HOST" == postgresql://* ]] || [[ "$DB_HOST" == postgres://* ]]; then
+        echo "✓ Using remote PostgreSQL (local psql not required)"
+    elif ! command_exists psql; then
+        echo "✗ PostgreSQL not found"
+        MISSING_DEPS=1
+    else
+        echo "✓ PostgreSQL installed"
+    fi
 else
-    echo "✓ PostgreSQL installed"
+    if ! command_exists psql; then
+        echo "⚠ PostgreSQL not found (may be using remote DB)"
+    else
+        echo "✓ PostgreSQL installed"
+    fi
 fi
 
 if ! command_exists python3; then

@@ -101,13 +101,38 @@ echo "=========================================="
 echo ""
 
 echo "Installing Python packages..."
-pip3 install web3 py-solc-x --quiet
 
-if [ $? -eq 0 ]; then
+# Try with virtual environment first, fall back to --break-system-packages if needed
+if pip3 install web3 py-solc-x --quiet 2>/dev/null; then
     echo "✓ Python dependencies installed"
+elif pip3 install web3 py-solc-x --break-system-packages --quiet 2>/dev/null; then
+    echo "✓ Python dependencies installed (system-wide)"
 else
-    echo "✗ Failed to install Python dependencies"
-    exit 1
+    echo "⚠ Could not install Python packages system-wide"
+    echo ""
+    echo "Creating virtual environment for Python dependencies..."
+    
+    VENV_DIR="$PROJECT_ROOT/blockchain/venv"
+    
+    if [ ! -d "$VENV_DIR" ]; then
+        python3 -m venv "$VENV_DIR"
+    fi
+    
+    source "$VENV_DIR/bin/activate"
+    pip install --upgrade pip --quiet
+    pip install web3 py-solc-x --quiet
+    
+    if [ $? -eq 0 ]; then
+        echo "✓ Python dependencies installed in virtual environment"
+        echo "  Location: $VENV_DIR"
+        echo ""
+        echo "  NOTE: Activate the venv before deploying contract:"
+        echo "  source blockchain/venv/bin/activate"
+        deactivate
+    else
+        echo "✗ Failed to install Python dependencies"
+        exit 1
+    fi
 fi
 
 echo ""

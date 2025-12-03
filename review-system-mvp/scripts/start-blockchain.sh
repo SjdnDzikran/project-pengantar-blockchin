@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BLOCKCHAIN_DIR="$PROJECT_ROOT/blockchain"
 DATA_DIR="$BLOCKCHAIN_DIR/data"
+GETH="$HOME/UGM/pengantar-blockchain/myblockchain/geth-linux-amd64-1.13.15-c5ba367e/geth"
 
 echo "=========================================="
 echo "Starting Blockchain Node"
@@ -22,7 +23,7 @@ if [ ! -d "$DATA_DIR/geth" ]; then
 fi
 
 # Get validator address (last account in keystore)
-VALIDATOR_ADDRESS=$(geth account list --datadir "$DATA_DIR" | grep "Account #2" | sed 's/.*{\(.*\)}.*/\1/')
+VALIDATOR_ADDRESS=$("$GETH" account list --datadir "$DATA_DIR" | grep "Account #2" | sed 's/.*{\(.*\)}.*/\1/')
 
 if [ -z "$VALIDATOR_ADDRESS" ]; then
     echo "✗ Validator account not found!"
@@ -58,7 +59,7 @@ echo "=========================================="
 echo ""
 
 # Start geth with all necessary flags
-geth \
+"$GETH" \
     --datadir "$DATA_DIR" \
     --networkid 110261 \
     --port 30303 \

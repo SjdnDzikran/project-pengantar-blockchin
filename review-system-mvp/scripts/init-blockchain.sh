@@ -10,6 +10,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BLOCKCHAIN_DIR="$PROJECT_ROOT/blockchain"
 DATA_DIR="$BLOCKCHAIN_DIR/data"
 OLD_KEYSTORE_DIR="$(dirname "$PROJECT_ROOT")/data/keystore"
+GETH="$HOME/UGM/pengantar-blockchain/myblockchain/geth-linux-amd64-1.13.15-c5ba367e/geth"
 
 echo "=========================================="
 echo "Blockchain Initialization"
@@ -53,7 +54,7 @@ if [ ! -f "genesis.json" ]; then
     exit 1
 fi
 
-geth --datadir "$DATA_DIR" init genesis.json
+"$GETH" --datadir "$DATA_DIR" init genesis.json
 
 if [ $? -eq 0 ]; then
     echo "✓ Genesis block initialized successfully"
@@ -74,7 +75,7 @@ echo ""
 echo "[5/5] Account Information:"
 echo ""
 echo "Available accounts:"
-geth account list --datadir "$DATA_DIR"
+"$GETH" account list --datadir "$DATA_DIR"
 
 echo ""
 echo "=========================================="
