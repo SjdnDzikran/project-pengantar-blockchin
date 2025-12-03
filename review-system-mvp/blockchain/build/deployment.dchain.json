@@ -1,0 +1,10 @@
+{
+  "contract_address": "0x3f9c46CF69c93B39c6D7e21723b465514Dd66758",
+  "deployer_address": "0x3B859543019Ac4F898994E82848ffbc9E1b7c689",
+  "transaction_hash": "fbe444ecfbd2c265295cda2919324e713c929d0e7fcd057608c43274775e8114",
+  "block_number": 1715,
+  "gas_used": 1916349,
+  "chain_id": 17845,
+  "rpc_url": "https://mainnet.dchain.id/",
+  "deployed_at": "2025-12-03 10:24:44"
+}
