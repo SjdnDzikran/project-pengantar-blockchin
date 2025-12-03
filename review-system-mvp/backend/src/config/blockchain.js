@@ -62,18 +62,30 @@ class BlockchainService {
 
         try {
             const deployerAddress = process.env.DEPLOYER_ADDRESS;
-            const deployerPassword = process.env.DEPLOYER_PASSWORD;
+            const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY;
 
-            // Unlock account
-            await this.web3.eth.personal.unlockAccount(deployerAddress, deployerPassword, 300);
+            if (!deployerPrivateKey) {
+                throw new Error('DEPLOYER_PRIVATE_KEY not configured in .env');
+            }
+
+            // Add account from private key
+            const account = this.web3.eth.accounts.privateKeyToAccount('0x' + deployerPrivateKey.replace('0x', ''));
+            this.web3.eth.accounts.wallet.add(account);
+
+            // Get current gas price
+            const gasPrice = await this.web3.eth.getGasPrice();
 
             // Send transaction
             const receipt = await this.contract.methods
                 .storeReview(reviewId, companyId, reviewerHash, reviewHash, rating, employmentProof)
                 .send({
-                    from: deployerAddress,
-                    gas: 500000
+                    from: account.address,
+                    gas: 500000,
+                    gasPrice: gasPrice
                 });
+
+            // Clear the wallet
+            this.web3.eth.accounts.wallet.clear();
 
             return {
                 transactionHash: receipt.transactionHash,

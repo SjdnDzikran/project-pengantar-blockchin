@@ -29,9 +29,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
+            // Clear auth and reconnect wallet
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            // Don't auto-redirect, let the component handle it
+            console.error('Authentication required. Please connect your wallet.');
         }
         return Promise.reject(error);
     }
@@ -42,6 +44,9 @@ export const authAPI = {
     register: (data) => api.post('/auth/register', data),
     login: (data) => api.post('/auth/login', data),
     getProfile: () => api.get('/auth/profile'),
+    // Wallet authentication
+    getNonce: (walletAddress) => api.get(`/auth/wallet/nonce/${walletAddress}`),
+    verifySignature: (walletAddress, signature) => api.post('/auth/wallet/verify', { walletAddress, signature }),
 };
 
 // Company APIs

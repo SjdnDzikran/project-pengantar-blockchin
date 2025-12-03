@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { BrowserProvider } from 'ethers';
-import { walletAuthAPI } from '../services/walletAuth';
+import { authAPI } from '../services/api';
 import useAuthStore from './authStore';
 
 const useWalletStore = create((set, get) => ({
@@ -47,7 +47,7 @@ const useWalletStore = create((set, get) => ({
 
     try {
       // Step 1: Get nonce from backend
-      const nonceResponse = await walletAuthAPI.getNonce(address);
+      const nonceResponse = await authAPI.getNonce(address);
       const { nonce, message } = nonceResponse.data.data;
 
       // Step 2: Sign the nonce with user's wallet
@@ -55,7 +55,7 @@ const useWalletStore = create((set, get) => ({
       const signature = await signer.signMessage(nonce);
 
       // Step 3: Verify signature and get JWT token
-      const authResponse = await walletAuthAPI.verifySignature(address, signature);
+      const authResponse = await authAPI.verifySignature(address, signature);
       const { user, token } = authResponse.data.data;
 
       // Step 4: Store auth data
