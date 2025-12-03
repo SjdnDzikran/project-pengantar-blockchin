@@ -8,29 +8,25 @@ import { toast } from 'react-toastify';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [connecting, setConnecting] = React.useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { isConnected, address, connectWallet, authenticateWallet, disconnectWallet } = useWalletStore();
+  const { isConnected, address, connectWallet, authenticateWallet, disconnectWallet, isConnecting } = useWalletStore();
 
   const handleConnect = async () => {
     try {
-      setConnecting(true);
-      
-      // Step 1: Connect wallet
       const address = await connectWallet();
       toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
-      
-      // Step 2: Authenticate with backend (sign message)
+    } catch (error) {
+      toast.error(error.message || 'Failed to connect wallet');
+    }
+  };
+
+  const handleAuthenticate = async () => {
+    try {
       toast.info('Please sign the message to authenticate...');
       await authenticateWallet();
       toast.success('Authentication successful!');
-      
-      // Stay on current page after authentication
     } catch (error) {
-      console.error('Connection/auth error:', error);
-      toast.error(error.message || 'Failed to connect wallet');
-    } finally {
-      setConnecting(false);
+      toast.error(error.message || 'Failed to authenticate');
     }
   };
 
@@ -76,7 +72,7 @@ export default function Navbar() {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-3">
-            {/* Wallet Status & Disconnect */}
+            {/* Authenticated State */}
             {isConnected && isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-800 rounded-md border border-slate-700">
@@ -92,14 +88,37 @@ export default function Navbar() {
                   Disconnect
                 </Button>
               </div>
+            ) : isConnected ? (
+              /* Connected but not authenticated */
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-800 rounded-md border border-slate-700">
+                  <Wallet className="h-4 w-4 text-yellow-500" />
+                  <span className="text-sm text-slate-300">{shortenAddress(address)}</span>
+                </div>
+                <Button
+                  onClick={handleAuthenticate}
+                  disabled={isConnecting}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isConnecting ? 'Signing...' : 'Sign to Authenticate'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleDisconnect}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             ) : (
+              /* Not connected */
               <Button
                 onClick={handleConnect}
-                disabled={connecting}
+                disabled={isConnecting}
                 className="flex items-center gap-2"
               >
                 <Wallet className="h-4 w-4" />
-                {connecting ? 'Connecting...' : 'Connect Wallet'}
+                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
               </Button>
             )}
           </div>

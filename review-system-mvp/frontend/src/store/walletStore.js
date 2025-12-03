@@ -10,9 +10,15 @@ const useWalletStore = create((set, get) => ({
   provider: null,
   chainId: null,
   isAuthenticating: false,
+  isConnecting: false,
   
   // Actions
   connectWallet: async () => {
+    const { isConnecting } = get();
+    if (isConnecting) return;
+    
+    set({ isConnecting: true });
+    
     try {
       if (!window.ethereum) {
         throw new Error('No wallet found. Please install MetaMask or another Web3 wallet.');
@@ -27,11 +33,13 @@ const useWalletStore = create((set, get) => ({
         address: accounts[0],
         provider,
         chainId: Number(network.chainId),
+        isConnecting: false,
       });
 
       return accounts[0];
     } catch (error) {
       console.error('Failed to connect wallet:', error);
+      set({ isConnecting: false });
       throw error;
     }
   },

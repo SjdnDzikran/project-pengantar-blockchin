@@ -9,39 +9,29 @@ import { toast } from 'react-toastify';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { connectWallet, authenticateWallet, isConnected } = useWalletStore();
+  const { connectWallet, isConnected, isConnecting } = useWalletStore();
   const { isAuthenticated } = useAuthStore();
-  const [connecting, setConnecting] = useState(false);
 
   const handleConnect = async () => {
     try {
-      setConnecting(true);
-      
-      // Step 1: Connect wallet
+      // Just connect wallet - no authentication required yet
       const address = await connectWallet();
       toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
       
-      // Step 2: Authenticate with backend (sign message)
-      toast.info('Please sign the message to authenticate...');
-      await authenticateWallet();
-      toast.success('Authentication successful!');
-      
-      // Navigate to companies page after successful authentication
+      // Navigate to companies page after successful connection
       navigate('/companies');
     } catch (error) {
-      console.error('Connection/auth error:', error);
+      console.error('Connection error:', error);
       toast.error(error.message || 'Failed to connect wallet');
-    } finally {
-      setConnecting(false);
     }
   };
 
   React.useEffect(() => {
-    // If already connected and authenticated, redirect
-    if (isConnected && isAuthenticated) {
+    // If already connected, redirect (no need to check authentication)
+    if (isConnected) {
       navigate('/companies');
     }
-  }, [isConnected, isAuthenticated, navigate]);
+  }, [isConnected, navigate]);
 
   const features = [
     {
@@ -75,9 +65,9 @@ export default function LandingPage() {
             <Boxes className="h-8 w-8 text-blue-500" />
             <span className="text-xl font-bold">CompanyReview</span>
           </div>
-          <Button onClick={handleConnect} disabled={connecting}>
+          <Button onClick={handleConnect} disabled={isConnecting}>
             <Wallet className="mr-2 h-4 w-4" />
-            {connecting ? 'Connecting...' : 'Connect Wallet'}
+            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
           </Button>
         </div>
       </header>
@@ -95,11 +85,11 @@ export default function LandingPage() {
             <Button
               size="lg"
               onClick={handleConnect}
-              disabled={connecting}
+              disabled={isConnecting}
               className="w-full sm:w-auto"
             >
               <Wallet className="mr-2 h-5 w-5" />
-              {connecting ? 'Connecting...' : 'Get Started'}
+              {isConnecting ? 'Connecting...' : 'Get Started'}
               <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
             <Button
@@ -186,10 +176,10 @@ export default function LandingPage() {
             <Button
               size="lg"
               onClick={handleConnect}
-              disabled={connecting}
+              disabled={isConnecting}
             >
               <Wallet className="mr-2 h-5 w-5" />
-              {connecting ? 'Connecting...' : 'Connect Wallet Now'}
+              {isConnecting ? 'Connecting...' : 'Connect Wallet Now'}
             </Button>
           </CardContent>
         </Card>

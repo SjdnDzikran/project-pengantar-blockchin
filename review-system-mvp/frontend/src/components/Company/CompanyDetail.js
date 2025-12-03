@@ -17,9 +17,8 @@ function CompanyDetail() {
     const [loading, setLoading] = useState(true);
     const [verifying, setVerifying] = useState({});
     const [verificationResults, setVerificationResults] = useState({});
-    const [connecting, setConnecting] = useState(false);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const { connectWallet, authenticateWallet } = useWalletStore();
+    const { connectWallet, isConnecting } = useWalletStore();
 
     useEffect(() => {
         fetchCompanyDetails();
@@ -65,21 +64,10 @@ function CompanyDetail() {
 
     const handleConnect = async () => {
         try {
-            setConnecting(true);
-            
-            // Step 1: Connect wallet
             const address = await connectWallet();
-            toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
-            
-            // Step 2: Authenticate with backend (sign message)
-            toast.info('Please sign the message to authenticate...');
-            await authenticateWallet();
-            toast.success('Authentication successful!');
+            toast.success(`Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
         } catch (error) {
-            console.error('Connection/auth error:', error);
             toast.error(error.message || 'Failed to connect wallet');
-        } finally {
-            setConnecting(false);
         }
     };
 
@@ -208,11 +196,11 @@ function CompanyDetail() {
                                 size="lg"
                                 variant="outline"
                                 onClick={handleConnect}
-                                disabled={connecting}
+                                disabled={isConnecting}
                                 className="flex items-center gap-2"
                             >
                                 <Wallet className="h-5 w-5" />
-                                {connecting ? 'Connecting...' : 'Connect Wallet to Review'}
+                                {isConnecting ? 'Connecting...' : 'Connect Wallet to Review'}
                             </Button>
                         )}
                     </CardContent>

@@ -30,22 +30,36 @@ function ReviewForm() {
     useEffect(() => {
         checkVerificationAndFetchCompany();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [companyId]);
+    }, [companyId, isAuthenticated]);
 
     const checkVerificationAndFetchCompany = async () => {
         try {
-            const [companyRes, verificationRes] = await Promise.all([
-                companyAPI.getById(companyId),
-                verificationAPI.check(companyId)
-            ]);
-
+            // Always fetch company info first (doesn't require auth)
+            const companyRes = await companyAPI.getById(companyId);
             setCompany(companyRes.data.data);
-            setIsVerified(verificationRes.data.data.isVerified);
 
-            if (!verificationRes.data.data.isVerified) {
+            // Only check verification if user is authenticated
+            if (isAuthenticated) {
+                try {
+                    const verificationRes = await verificationAPI.check(companyId);
+                    setIsVerified(verificationRes.data.data.isVerified);
+
+                    if (!verificationRes.data.data.isVerified) {
+                        setShowVerification(true);
+                    }
+                } catch (verificationError) {
+                    // If verification check fails, assume not verified
+                    console.warn('Verification check failed:', verificationError);
+                    setIsVerified(false);
+                    setShowVerification(true);
+                }
+            } else {
+                // Not authenticated, show verification form
+                setIsVerified(false);
                 setShowVerification(true);
             }
         } catch (error) {
+            console.error('Error fetching company:', error);
             toast.error('Failed to load company information');
         } finally {
             setLoading(false);
@@ -55,9 +69,21 @@ function ReviewForm() {
     const handleVerification = async (e) => {
         e.preventDefault();
 
-        if (!isConnected || !isAuthenticated) {
-            toast.error('Please connect and authenticate your wallet first');
+        if (!isConnected) {
+            toast.error('Please connect your wallet first');
             return;
+        }
+
+        // Auto-authenticate if connected but not authenticated
+        if (!isAuthenticated) {
+            try {
+                toast.info('Please sign the message to authenticate...');
+                await authenticateWallet();
+                toast.success('Authentication successful!');
+            } catch (error) {
+                toast.error(error.message || 'Authentication failed');
+                return;
+            }
         }
 
         if (!formData.employeeId) {
@@ -82,9 +108,21 @@ function ReviewForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!isConnected || !isAuthenticated) {
-            toast.error('Please connect and authenticate your wallet first');
+        if (!isConnected) {
+            toast.error('Please connect your wallet first');
             return;
+        }
+
+        // Auto-authenticate if connected but not authenticated
+        if (!isAuthenticated) {
+            try {
+                toast.info('Please sign the message to authenticate...');
+                await authenticateWallet();
+                toast.success('Authentication successful!');
+            } catch (error) {
+                toast.error(error.message || 'Authentication failed');
+                return;
+            }
         }
 
         if (!isVerified) {
@@ -323,21 +361,20 @@ function ReviewForm() {
                                 You must verify your employment with {company.company_name} before submitting a review.
                             </p>
 
-                            {!isConnected || !isAuthenticated ? (
+                            {!isConnected ? (
                                 <div className="bg-yellow-950 border border-yellow-800 rounded-lg p-4 mb-6">
                                     <div className="flex items-start gap-3">
                                         <Wallet className="h-5 w-5 text-yellow-400 mt-0.5 shrink-0" />
                                         <div>
                                             <p className="text-yellow-200 font-semibold mb-2">Wallet Connection Required</p>
                                             <p className="text-yellow-200 text-sm mb-4">
-                                                You need to connect and authenticate your wallet to verify employment and submit reviews.
+                                                You need to connect your wallet to verify employment and submit reviews.
                                             </p>
                                             <Button
                                                 onClick={async () => {
                                                     try {
-                                                        const addr = await connectWallet();
-                                                        await authenticateWallet();
-                                                        toast.success('Wallet connected and authenticated!');
+                                                        await connectWallet();
+                                                        toast.success('Wallet connected!');
                                                     } catch (error) {
                                                         toast.error(error.message || 'Failed to connect wallet');
                                                     }
@@ -370,7 +407,7 @@ function ReviewForm() {
                                     </small>
                                 </div>
 
-                                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={!isConnected || !isAuthenticated}>
+                                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={!isConnected}>
                                     <Shield className="h-4 w-4 mr-2" />
                                     Verify Employment
                                 </Button>
@@ -380,7 +417,7 @@ function ReviewForm() {
                 ) : (
                     <Card className="bg-slate-900 border-slate-800">
                         <CardContent className="pt-6">
-                            {!isConnected || !isAuthenticated ? (
+                            {!isConnected ? (
                                 <div className="bg-yellow-950 border border-yellow-800 rounded-lg p-4 mb-6">
                                     <div className="flex items-start gap-3">
                                         <Wallet className="h-5 w-5 text-yellow-400 mt-0.5 shrink-0" />
@@ -392,9 +429,8 @@ function ReviewForm() {
                                             <Button
                                                 onClick={async () => {
                                                     try {
-                                                        const addr = await connectWallet();
-                                                        await authenticateWallet();
-                                                        toast.success('Wallet connected and authenticated!');
+                                                        await connectWallet();
+                                                        toast.success('Wallet connected!');
                                                     } catch (error) {
                                                         toast.error(error.message || 'Failed to connect wallet');
                                                     }
@@ -448,7 +484,7 @@ function ReviewForm() {
                                 <Button
                                     type="submit"
                                     className="w-full bg-blue-600 hover:bg-blue-700"
-                                    disabled={submitting || !isConnected || !isAuthenticated}
+                                    disabled={submitting || !isConnected}
                                 >
                                     {submitting ? (
                                         <>
