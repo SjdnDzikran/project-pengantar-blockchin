@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -81,6 +82,16 @@ app.get('/', (req, res) => {
             verifications: '/api/verifications'
         }
     });
+});
+
+// Serve frontend build (Docker/production)
+const frontendBuildPath = path.join(__dirname, '../../frontend/build');
+app.use(express.static(frontendBuildPath));
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+    return res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
 // 404 handler
