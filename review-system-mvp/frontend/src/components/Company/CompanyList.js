@@ -71,7 +71,7 @@ function CompanyList() {
             await fetchCompanies();
             
             // Redirect to review page for the new company
-            navigate(`/companies/${createdCompany.company_id}/review`);
+            navigate(`/review/${createdCompany.company_id}`);
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Failed to create company';
             toast.error(errorMessage);
