@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import useAuthStore from './store/authStore';
 import useWalletStore from './store/walletStore';
 import LandingPage from './components/Landing/LandingPage';
 import CompanyList from './components/Company/CompanyList';
@@ -12,10 +11,10 @@ import ReviewForm from './components/Review/ReviewForm';
 import UserDashboard from './components/Dashboard/UserDashboard';
 import './App.css';
 
-// Protected Route Component - requires wallet authentication
+// Protected Route Component - requires wallet connection
 function ProtectedRoute({ children }) {
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    return isAuthenticated ? children : <Navigate to="/" />;
+    const isConnected = useWalletStore((state) => state.isConnected);
+    return isConnected ? children : <Navigate to="/" />;
 }
 
 function App() {
@@ -51,7 +50,7 @@ function App() {
                     <Route path="/companies" element={<CompanyList />} />
                     <Route path="/companies/:id" element={<CompanyDetail />} />
 
-                    {/* Protected Routes - require wallet authentication */}
+                    {/* Protected Routes - require wallet connection */}
                     <Route
                         path="/dashboard"
                         element={
