@@ -12,14 +12,10 @@ export default function LandingPage() {
 
   const handleConnect = async () => {
     try {
-      // Just connect wallet - no authentication required yet
       const address = await connectWallet();
-      toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
-      
-      // Navigate to companies page after successful connection
+      toast.success(`Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
       navigate('/companies');
     } catch (error) {
-      console.error('Connection error:', error);
       toast.error(error.message || 'Failed to connect wallet');
     }
   };

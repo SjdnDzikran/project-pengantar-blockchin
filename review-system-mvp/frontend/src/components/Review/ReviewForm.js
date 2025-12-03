@@ -106,7 +106,6 @@ function ReviewForm() {
 
         try {
             // Step 1: Prepare review data (get hashes from backend)
-            toast.info('Preparing review data...');
             const prepareResponse = await reviewAPI.prepare({
                 companyId,
                 rating: formData.rating,
@@ -115,17 +114,12 @@ function ReviewForm() {
             });
 
             const reviewData = prepareResponse.data.data;
-            console.log('Review data prepared:', reviewData);
 
             // Step 2: Submit to blockchain with user's wallet
             toast.info('Please confirm the transaction in your wallet...');
             const blockchainResult = await submitReviewToBlockchain(reviewData);
             
-            console.log('Blockchain transaction confirmed:', blockchainResult);
-            toast.success('Review submitted to blockchain!');
-
             // Step 3: Store metadata in backend database
-            toast.info('Saving review data...');
             const response = await reviewAPI.submit({
                 companyId,
                 rating: formData.rating,
@@ -140,7 +134,7 @@ function ReviewForm() {
                 }
             });
 
-            toast.success('Review saved successfully!');
+            toast.success('Review submitted successfully!');
             setSubmissionResult(response.data.data);
         } catch (error) {
             console.error('Submit error:', error);
@@ -346,7 +340,7 @@ function ReviewForm() {
                                                 onClick={async () => {
                                                     try {
                                                         await connectWallet();
-                                                        toast.success('Wallet connected!');
+                                                        toast.success('Connected successfully!');
                                                     } catch (error) {
                                                         toast.error(error.message || 'Failed to connect wallet');
                                                     }
@@ -402,7 +396,7 @@ function ReviewForm() {
                                                 onClick={async () => {
                                                     try {
                                                         await connectWallet();
-                                                        toast.success('Wallet connected!');
+                                                        toast.success('Connected successfully!');
                                                     } catch (error) {
                                                         toast.error(error.message || 'Failed to connect wallet');
                                                     }

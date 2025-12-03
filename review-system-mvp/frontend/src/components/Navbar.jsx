@@ -12,7 +12,7 @@ export default function Navbar() {
   const handleConnect = async () => {
     try {
       const address = await connectWallet();
-      toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+      toast.success(`Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
     } catch (error) {
       toast.error(error.message || 'Failed to connect wallet');
     }
@@ -20,7 +20,6 @@ export default function Navbar() {
 
   const handleDisconnect = () => {
     disconnectWallet();
-    toast.info('Wallet disconnected');
     navigate('/');
   };
 

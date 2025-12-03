@@ -63,7 +63,7 @@ function CompanyList() {
             const response = await companyAPI.create(newCompanyData);
             const createdCompany = response.data.data;
             
-            toast.success('Company created! Redirecting to review page...');
+            toast.success('Company created successfully!');
             setShowNewCompanyModal(false);
             
             // Refresh companies list
