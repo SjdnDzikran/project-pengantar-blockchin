@@ -11,20 +11,25 @@ const useAuthStore = create((set) => ({
         set({ user, token, isAuthenticated: true });
     },
 
+    logout: () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        set({ user: null, token: null, isAuthenticated: false });
+    },
+
     clearAuth: () => {
+        // Alias for logout for backwards compatibility
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         set({ user: null, token: null, isAuthenticated: false });
     },
 
     updateUser: (userData) => {
-        const updatedUser = { ...get().user, ...userData };
+        const currentUser = useAuthStore.getState().user;
+        const updatedUser = { ...currentUser, ...userData };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         set({ user: updatedUser });
     },
 }));
-
-// Helper to get current state
-const get = () => useAuthStore.getState();
 
 export default useAuthStore;

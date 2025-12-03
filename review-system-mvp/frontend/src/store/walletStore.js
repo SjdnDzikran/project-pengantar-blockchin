@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { BrowserProvider } from 'ethers';
+import { walletAuthAPI } from '../services/walletAuth';
+import useAuthStore from './authStore';
 
 const useWalletStore = create((set, get) => ({
   // State
@@ -7,6 +9,7 @@ const useWalletStore = create((set, get) => ({
   address: null,
   provider: null,
   chainId: null,
+  isAuthenticating: false,
   
   // Actions
   connectWallet: async () => {
@@ -33,6 +36,41 @@ const useWalletStore = create((set, get) => ({
     }
   },
 
+  authenticateWallet: async () => {
+    const { address, provider } = get();
+    
+    if (!address || !provider) {
+      throw new Error('Wallet not connected');
+    }
+
+    set({ isAuthenticating: true });
+
+    try {
+      // Step 1: Get nonce from backend
+      const nonceResponse = await walletAuthAPI.getNonce(address);
+      const { nonce, message } = nonceResponse.data.data;
+
+      // Step 2: Sign the nonce with user's wallet
+      const signer = await provider.getSigner();
+      const signature = await signer.signMessage(nonce);
+
+      // Step 3: Verify signature and get JWT token
+      const authResponse = await walletAuthAPI.verifySignature(address, signature);
+      const { user, token } = authResponse.data.data;
+
+      // Step 4: Store auth data
+      localStorage.setItem('token', token);
+      useAuthStore.getState().setAuth(user, token);
+
+      return { user, token };
+    } catch (error) {
+      console.error('Failed to authenticate wallet:', error);
+      throw error;
+    } finally {
+      set({ isAuthenticating: false });
+    }
+  },
+
   disconnectWallet: () => {
     set({
       isConnected: false,
@@ -40,6 +78,10 @@ const useWalletStore = create((set, get) => ({
       provider: null,
       chainId: null,
     });
+    
+    // Also clear auth
+    localStorage.removeItem('token');
+    useAuthStore.getState().logout();
   },
 
   // Listen to account changes
@@ -51,6 +93,9 @@ const useWalletStore = create((set, get) => ({
         get().disconnectWallet();
       } else {
         set({ address: accounts[0] });
+        // Clear auth when account changes - user needs to re-authenticate
+        localStorage.removeItem('token');
+        useAuthStore.getState().logout();
       }
     });
 

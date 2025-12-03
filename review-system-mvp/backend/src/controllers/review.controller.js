@@ -8,6 +8,7 @@ const { generateReviewId, hashEmail, hashEmployeeId, hashReviewContent } = requi
 async function submitReview(req, res) {
     const { companyId, rating, reviewText, employeeId } = req.body;
     const userId = req.user.userId;
+    const walletAddress = req.user.walletAddress; // From JWT token
 
     try {
         // Validate input
@@ -40,7 +41,7 @@ async function submitReview(req, res) {
 
         const company = companyResult.rows[0];
 
-        // Check employment verification (optional for MVP)
+        // Check employment verification
         const verificationResult = await pool.query(
             `SELECT verification_id FROM employment_verifications
              WHERE user_id = $1 AND company_id = $2 AND status = 'approved'`,
@@ -54,19 +55,11 @@ async function submitReview(req, res) {
             });
         }
 
-        // Get user email for hashing
-        const userResult = await pool.query(
-            'SELECT email FROM users WHERE user_id = $1',
-            [userId]
-        );
-
-        const userEmail = userResult.rows[0].email;
-
         // Generate review ID
         const reviewId = generateReviewId();
 
-        // Hash reviewer identity
-        const reviewerHash = hashEmail(userEmail);
+        // Hash reviewer identity (using wallet address)
+        const reviewerHash = hashEmail(walletAddress); // Reusing hashEmail function for wallet address
 
         // Hash employment proof
         const employmentProof = employeeId ? hashEmployeeId(employeeId) : reviewerHash;
@@ -100,9 +93,9 @@ async function submitReview(req, res) {
         // Store metadata in database
         await pool.query(
             `INSERT INTO review_metadata
-             (review_id, user_id, company_id, blockchain_tx_hash, block_number, review_hash)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [reviewId, userId, companyId, blockchainResult.transactionHash, blockchainResult.blockNumber, reviewHash]
+             (review_id, user_id, company_id, wallet_address, blockchain_tx_hash, block_number, review_hash)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [reviewId, userId, companyId, walletAddress, blockchainResult.transactionHash, blockchainResult.blockNumber, reviewHash]
         );
 
         // Store in cache for fast queries

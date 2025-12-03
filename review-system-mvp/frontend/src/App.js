@@ -6,18 +6,16 @@ import 'react-toastify/dist/ReactToastify.css';
 import useAuthStore from './store/authStore';
 import useWalletStore from './store/walletStore';
 import LandingPage from './components/Landing/LandingPage';
-import Login from './components/Auth/Login';
-import Register from './components/Auth/Register';
 import CompanyList from './components/Company/CompanyList';
 import CompanyDetail from './components/Company/CompanyDetail';
 import ReviewForm from './components/Review/ReviewForm';
 import UserDashboard from './components/Dashboard/UserDashboard';
 import './App.css';
 
-// Protected Route Component
+// Protected Route Component - requires wallet authentication
 function ProtectedRoute({ children }) {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    return isAuthenticated ? children : <Navigate to="/" />;
 }
 
 function App() {
@@ -45,16 +43,14 @@ function App() {
                 />
 
                 <Routes>
-                    {/* Landing Page */}
+                    {/* Landing Page with wallet connection */}
                     <Route path="/" element={<LandingPage />} />
 
                     {/* Public Routes */}
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
                     <Route path="/companies" element={<CompanyList />} />
                     <Route path="/companies/:id" element={<CompanyDetail />} />
 
-                    {/* Protected Routes */}
+                    {/* Protected Routes - require wallet authentication */}
                     <Route
                         path="/dashboard"
                         element={
@@ -71,8 +67,6 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
-
-                    {/* Default redirect removed - landing page is now at / */}
                 </Routes>
             </div>
         </Router>

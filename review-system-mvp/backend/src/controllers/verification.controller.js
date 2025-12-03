@@ -7,6 +7,7 @@ const { hashEmployeeId } = require('../utils/hash');
 async function submitVerification(req, res) {
     const { companyId, employeeId } = req.body;
     const userId = req.user.userId;
+    const walletAddress = req.user.walletAddress; // From JWT token
 
     try {
         // Validate input
@@ -53,10 +54,10 @@ async function submitVerification(req, res) {
         // Create verification (auto-approve for MVP)
         const result = await pool.query(
             `INSERT INTO employment_verifications
-             (user_id, company_id, employee_id_hash, status, verified_at)
-             VALUES ($1, $2, $3, $4, NOW())
+             (user_id, company_id, employee_id_hash, wallet_address, status, verified_at)
+             VALUES ($1, $2, $3, $4, $5, NOW())
              RETURNING verification_id, status, created_at, verified_at`,
-            [userId, companyId, employeeIdHash, 'approved']
+            [userId, companyId, employeeIdHash, walletAddress, 'approved']
         );
 
         res.status(201).json({

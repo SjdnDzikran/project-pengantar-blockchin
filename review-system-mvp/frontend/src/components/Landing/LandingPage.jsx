@@ -4,21 +4,32 @@ import { Wallet, Shield, Database, Lock, ChevronRight, Boxes } from 'lucide-reac
 import Button from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import useWalletStore from '../../store/walletStore';
+import useAuthStore from '../../store/authStore';
 import { toast } from 'react-toastify';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { connectWallet, isConnected } = useWalletStore();
+  const { connectWallet, authenticateWallet, isConnected } = useWalletStore();
+  const { isAuthenticated } = useAuthStore();
   const [connecting, setConnecting] = useState(false);
 
   const handleConnect = async () => {
     try {
       setConnecting(true);
-      await connectWallet();
-      toast.success('Wallet connected successfully!');
-      // Navigate to companies page after connection
+      
+      // Step 1: Connect wallet
+      const address = await connectWallet();
+      toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+      
+      // Step 2: Authenticate with backend (sign message)
+      toast.info('Please sign the message to authenticate...');
+      await authenticateWallet();
+      toast.success('Authentication successful!');
+      
+      // Navigate to companies page after successful authentication
       navigate('/companies');
     } catch (error) {
+      console.error('Connection/auth error:', error);
       toast.error(error.message || 'Failed to connect wallet');
     } finally {
       setConnecting(false);
@@ -26,11 +37,11 @@ export default function LandingPage() {
   };
 
   React.useEffect(() => {
-    // If already connected, redirect
-    if (isConnected) {
+    // If already connected and authenticated, redirect
+    if (isConnected && isAuthenticated) {
       navigate('/companies');
     }
-  }, [isConnected, navigate]);
+  }, [isConnected, isAuthenticated, navigate]);
 
   const features = [
     {
