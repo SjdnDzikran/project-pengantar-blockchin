@@ -69,21 +69,6 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/verifications', verificationRoutes);
 
-// Root endpoint
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Company Review System API',
-        version: '1.0.0',
-        endpoints: {
-            health: '/health',
-            auth: '/api/auth',
-            companies: '/api/companies',
-            reviews: '/api/reviews',
-            verifications: '/api/verifications'
-        }
-    });
-});
-
 // Serve frontend build (Docker/production)
 const frontendBuildPath = path.join(__dirname, '../../frontend/build');
 app.use(express.static(frontendBuildPath));
