@@ -70,8 +70,7 @@ export const reviewAPI = {
 // Verification APIs
 export const verificationAPI = {
     submit: (data) => api.post('/verifications', data),
-    getAll: () => api.get('/verifications'),
-    check: (companyId) => api.get(`/verifications/${companyId}`),
+    check: (companyId, walletAddress) => api.get(`/verifications/${companyId}/${walletAddress}`),
 };
 
 export default api;

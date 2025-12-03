@@ -12,7 +12,7 @@ import { Card, CardContent } from '../ui/Card';
 function ReviewForm() {
     const { companyId } = useParams();
     const navigate = useNavigate();
-    const { isConnected, connectWallet } = useWalletStore();
+    const { isConnected, address, connectWallet } = useWalletStore();
     const [company, setCompany] = useState(null);
     const [isVerified, setIsVerified] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -37,9 +37,9 @@ function ReviewForm() {
             setCompany(companyRes.data.data);
 
             // Only check verification if wallet is connected
-            if (isConnected) {
+            if (isConnected && address) {
                 try {
-                    const verificationRes = await verificationAPI.check(companyId);
+                    const verificationRes = await verificationAPI.check(companyId, address);
                     setIsVerified(verificationRes.data.data.isVerified);
 
                     if (!verificationRes.data.data.isVerified) {
@@ -78,7 +78,8 @@ function ReviewForm() {
         try {
             await verificationAPI.submit({
                 companyId,
-                employeeId: formData.employeeId
+                employeeId: formData.employeeId,
+                walletAddress: address
             });
 
             toast.success('Employment verified successfully!');

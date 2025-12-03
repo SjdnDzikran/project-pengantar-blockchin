@@ -5,16 +5,14 @@ const { hashEmployeeId } = require('../utils/hash');
  * Submit employment verification
  */
 async function submitVerification(req, res) {
-    const { companyId, employeeId } = req.body;
-    const userId = req.user.userId;
-    const walletAddress = req.user.walletAddress; // From JWT token
+    const { companyId, employeeId, walletAddress } = req.body;
 
     try {
         // Validate input
-        if (!companyId || !employeeId) {
+        if (!companyId || !employeeId || !walletAddress) {
             return res.status(400).json({
                 success: false,
-                message: 'Company ID and employee ID are required'
+                message: 'Company ID, employee ID, and wallet address are required'
             });
         }
 
@@ -31,6 +29,26 @@ async function submitVerification(req, res) {
             });
         }
 
+        // Get or create user by wallet address
+        let userResult = await pool.query(
+            'SELECT user_id FROM users WHERE LOWER(wallet_address) = LOWER($1)',
+            [walletAddress]
+        );
+
+        let userId;
+        if (userResult.rows.length === 0) {
+            // Create new user
+            const newUser = await pool.query(
+                `INSERT INTO users (wallet_address, email, email_hash, password_hash)
+                 VALUES ($1, $2, $3, $4)
+                 RETURNING user_id`,
+                [walletAddress.toLowerCase(), `${walletAddress.toLowerCase()}@wallet.local`, walletAddress.toLowerCase(), 'WALLET_AUTH']
+            );
+            userId = newUser.rows[0].user_id;
+        } else {
+            userId = userResult.rows[0].user_id;
+        }
+
         // Check if verification already exists
         const existingVerification = await pool.query(
             `SELECT verification_id, status FROM employment_verifications
@@ -39,11 +57,12 @@ async function submitVerification(req, res) {
         );
 
         if (existingVerification.rows.length > 0) {
-            return res.status(409).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: 'Verification already exists for this company',
                 data: {
-                    status: existingVerification.rows[0].status
+                    status: existingVerification.rows[0].status,
+                    isVerified: existingVerification.rows[0].status === 'approved'
                 }
             });
         }
@@ -115,10 +134,27 @@ async function getUserVerifications(req, res) {
  * Check if user is verified for a company
  */
 async function checkVerification(req, res) {
-    const { companyId } = req.params;
-    const userId = req.user.userId;
+    const { companyId, walletAddress } = req.params;
 
     try {
+        // Get user by wallet address
+        const userResult = await pool.query(
+            'SELECT user_id FROM users WHERE LOWER(wallet_address) = LOWER($1)',
+            [walletAddress]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.json({
+                success: true,
+                data: {
+                    isVerified: false,
+                    message: 'User not found'
+                }
+            });
+        }
+
+        const userId = userResult.rows[0].user_id;
+
         const result = await pool.query(
             `SELECT verification_id, status, verified_at
              FROM employment_verifications
@@ -129,6 +165,31 @@ async function checkVerification(req, res) {
         if (result.rows.length === 0) {
             return res.json({
                 success: true,
+                data: {
+                    isVerified: false,
+                    message: 'No verification found'
+                }
+            });
+        }
+
+        const verification = result.rows[0];
+        res.json({
+            success: true,
+            data: {
+                isVerified: verification.status === 'approved',
+                status: verification.status,
+                verifiedAt: verification.verified_at
+            }
+        });
+    } catch (error) {
+        console.error('Check verification error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to check verification',
+            error: error.message
+        });
+    }
+}
                 data: {
                     isVerified: false,
                     status: null
@@ -159,6 +220,5 @@ async function checkVerification(req, res) {
 
 module.exports = {
     submitVerification,
-    getUserVerifications,
     checkVerification
 };
