@@ -190,33 +190,6 @@ async function checkVerification(req, res) {
         });
     }
 }
-                data: {
-                    isVerified: false,
-                    status: null
-                }
-            });
-        }
-
-        const verification = result.rows[0];
-
-        res.json({
-            success: true,
-            data: {
-                isVerified: verification.status === 'approved',
-                status: verification.status,
-                verificationId: verification.verification_id,
-                verifiedAt: verification.verified_at
-            }
-        });
-    } catch (error) {
-        console.error('Check verification error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to check verification',
-            error: error.message
-        });
-    }
-}
 
 module.exports = {
     submitVerification,

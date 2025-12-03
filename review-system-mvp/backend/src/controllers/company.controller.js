@@ -169,7 +169,7 @@ async function searchCompanies(req, res) {
  * Create new company (admin only for MVP)
  */
 async function createCompany(req, res) {
-    const { companyName, industry, location, website, description } = req.body;
+    const { companyName, industry, location, website, description, walletAddress } = req.body;
 
     try {
         // Validate input
@@ -177,6 +177,13 @@ async function createCompany(req, res) {
             return res.status(400).json({
                 success: false,
                 message: 'Company name is required'
+            });
+        }
+
+        if (!walletAddress) {
+            return res.status(400).json({
+                success: false,
+                message: 'Wallet address is required'
             });
         }
 

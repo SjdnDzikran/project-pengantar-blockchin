@@ -17,23 +17,27 @@ function UserDashboard() {
     const { address } = useWalletStore();
 
     useEffect(() => {
-        fetchDashboardData();
-    }, []);
+        const fetchDashboardData = async () => {
+            try {
+                if (!address) {
+                    setReviews([]);
+                    setLoading(false);
+                    return;
+                }
 
-    const fetchDashboardData = async () => {
-        try {
-            // Since we removed authentication, we'll show all reviews for now
-            // In production, you'd filter by wallet address on the backend
-            const reviewsRes = await reviewAPI.getUserReviews();
-            setReviews(reviewsRes.data.data || []);
-        } catch (error) {
-            console.error('Failed to fetch reviews:', error);
-            // Don't show error toast, just show empty state
-            setReviews([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+                const reviewsRes = await reviewAPI.getUserReviews(address);
+                setReviews(reviewsRes.data.data || []);
+            } catch (error) {
+                console.error('Failed to fetch reviews:', error);
+                // Don't show error toast, just show empty state
+                setReviews([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, [address]);
 
     const handleVerifyReview = async (reviewId) => {
         setVerifying({ ...verifying, [reviewId]: true });

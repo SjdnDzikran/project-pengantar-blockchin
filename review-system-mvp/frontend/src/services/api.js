@@ -10,30 +10,12 @@ const api = axios.create({
     },
 });
 
-// Add auth token to requests
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
 // Handle response errors
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Clear auth and reconnect wallet
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            // Don't auto-redirect, let the component handle it
-            console.error('Authentication required. Please connect your wallet.');
+            console.error('Request requires wallet connection');
         }
         return Promise.reject(error);
     }
@@ -63,7 +45,7 @@ export const reviewAPI = {
     prepare: (data) => api.post('/reviews/prepare', data),
     submit: (data) => api.post('/reviews', data),
     getById: (id) => api.get(`/reviews/${id}`),
-    getUserReviews: () => api.get('/reviews/user'),
+    getUserReviews: (walletAddress) => api.get(`/reviews/user/${walletAddress}`),
     verify: (id) => api.get(`/reviews/${id}/verify`),
 };
 

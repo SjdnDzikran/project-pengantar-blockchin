@@ -111,7 +111,8 @@ function ReviewForm() {
                 companyId,
                 rating: formData.rating,
                 reviewText: formData.reviewText,
-                employeeId: formData.employeeId
+                employeeId: formData.employeeId,
+                walletAddress: address
             });
 
             const reviewData = prepareResponse.data.data;
@@ -126,6 +127,7 @@ function ReviewForm() {
                 rating: formData.rating,
                 reviewText: formData.reviewText,
                 employeeId: formData.employeeId,
+                walletAddress: address,
                 blockchainData: {
                     reviewId: reviewData.reviewId,
                     transactionHash: blockchainResult.transactionHash,

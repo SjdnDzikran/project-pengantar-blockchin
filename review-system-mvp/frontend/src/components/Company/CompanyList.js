@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Star, MapPin, Building2, Plus, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { companyAPI } from '../../services/api';
+import useWalletStore from '../../store/walletStore';
 import Navbar from '../Navbar';
 import Button from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
@@ -21,6 +22,7 @@ function CompanyList() {
     });
     const [creating, setCreating] = useState(false);
     const navigate = useNavigate();
+    const { address } = useWalletStore();
 
     useEffect(() => {
         fetchCompanies();
@@ -56,7 +58,10 @@ function CompanyList() {
         setCreating(true);
 
         try {
-            const response = await companyAPI.create(newCompanyData);
+            const response = await companyAPI.create({ 
+                ...newCompanyData, 
+                walletAddress: address 
+            });
             const createdCompany = response.data.data;
             
             toast.success('Company created successfully!');

@@ -7,9 +7,7 @@ const { generateReviewId, hashEmail, hashEmployeeId, hashReviewContent } = requi
  * Note: Frontend now handles blockchain transaction, backend only stores metadata
  */
 async function submitReview(req, res) {
-    const { companyId, rating, reviewText, employeeId, blockchainData } = req.body;
-    const userId = req.user.userId;
-    const walletAddress = req.user.walletAddress; // From JWT token
+    const { companyId, rating, reviewText, employeeId, blockchainData, walletAddress } = req.body;
 
     try {
         // Validate input
@@ -17,6 +15,13 @@ async function submitReview(req, res) {
             return res.status(400).json({
                 success: false,
                 message: 'Company ID and rating are required'
+            });
+        }
+
+        if (!walletAddress) {
+            return res.status(400).json({
+                success: false,
+                message: 'Wallet address is required'
             });
         }
 
@@ -48,6 +53,21 @@ async function submitReview(req, res) {
         }
 
         const company = companyResult.rows[0];
+
+        // Look up user by wallet address
+        const userResult = await pool.query(
+            'SELECT user_id FROM users WHERE LOWER(wallet_address) = LOWER($1)',
+            [walletAddress]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found. Please verify employment first.'
+            });
+        }
+
+        const userId = userResult.rows[0].user_id;
 
         // Check employment verification
         const verificationResult = await pool.query(
@@ -211,9 +231,31 @@ async function verifyReview(req, res) {
  * Get user's reviews
  */
 async function getUserReviews(req, res) {
-    const userId = req.user.userId;
+    const { walletAddress } = req.params;
 
     try {
+        if (!walletAddress) {
+            return res.status(400).json({
+                success: false,
+                message: 'Wallet address is required'
+            });
+        }
+
+        // Look up user by wallet address
+        const userResult = await pool.query(
+            'SELECT user_id FROM users WHERE LOWER(wallet_address) = LOWER($1)',
+            [walletAddress]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.json({
+                success: true,
+                data: []
+            });
+        }
+
+        const userId = userResult.rows[0].user_id;
+
         const result = await pool.query(`
             SELECT
                 rc.*,
@@ -245,9 +287,7 @@ async function getUserReviews(req, res) {
  * Returns hashes and reviewId that frontend will use to submit transaction
  */
 async function prepareReview(req, res) {
-    const { companyId, rating, reviewText, employeeId } = req.body;
-    const userId = req.user.userId;
-    const walletAddress = req.user.walletAddress;
+    const { companyId, rating, reviewText, employeeId, walletAddress } = req.body;
 
     try {
         // Validate input
@@ -257,6 +297,28 @@ async function prepareReview(req, res) {
                 message: 'Company ID and rating are required'
             });
         }
+
+        if (!walletAddress) {
+            return res.status(400).json({
+                success: false,
+                message: 'Wallet address is required'
+            });
+        }
+
+        // Look up user by wallet address
+        const userResult = await pool.query(
+            'SELECT user_id FROM users WHERE LOWER(wallet_address) = LOWER($1)',
+            [walletAddress]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found. Please verify employment first.'
+            });
+        }
+
+        const userId = userResult.rows[0].user_id;
 
         // Check employment verification
         const verificationResult = await pool.query(
