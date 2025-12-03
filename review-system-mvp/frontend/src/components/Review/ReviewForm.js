@@ -5,16 +5,14 @@ import { toast } from 'react-toastify';
 import { companyAPI, reviewAPI, verificationAPI } from '../../services/api';
 import { submitReviewToBlockchain } from '../../services/blockchain';
 import useWalletStore from '../../store/walletStore';
-import useAuthStore from '../../store/authStore';
 import Navbar from '../Navbar';
 import Button from '../ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
+import { Card, CardContent } from '../ui/Card';
 
 function ReviewForm() {
     const { companyId } = useParams();
     const navigate = useNavigate();
-    const { isConnected, address, connectWallet, authenticateWallet } = useWalletStore();
-    const { isAuthenticated } = useAuthStore();
+    const { isConnected, connectWallet } = useWalletStore();
     const [company, setCompany] = useState(null);
     const [isVerified, setIsVerified] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -30,16 +28,16 @@ function ReviewForm() {
     useEffect(() => {
         checkVerificationAndFetchCompany();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [companyId, isAuthenticated]);
+    }, [companyId, isConnected]);
 
     const checkVerificationAndFetchCompany = async () => {
         try {
-            // Always fetch company info first (doesn't require auth)
+            // Always fetch company info first
             const companyRes = await companyAPI.getById(companyId);
             setCompany(companyRes.data.data);
 
-            // Only check verification if user is authenticated
-            if (isAuthenticated) {
+            // Only check verification if wallet is connected
+            if (isConnected) {
                 try {
                     const verificationRes = await verificationAPI.check(companyId);
                     setIsVerified(verificationRes.data.data.isVerified);
@@ -48,13 +46,11 @@ function ReviewForm() {
                         setShowVerification(true);
                     }
                 } catch (verificationError) {
-                    // If verification check fails, assume not verified
                     console.warn('Verification check failed:', verificationError);
                     setIsVerified(false);
                     setShowVerification(true);
                 }
             } else {
-                // Not authenticated, show verification form
                 setIsVerified(false);
                 setShowVerification(true);
             }
@@ -72,18 +68,6 @@ function ReviewForm() {
         if (!isConnected) {
             toast.error('Please connect your wallet first');
             return;
-        }
-
-        // Auto-authenticate if connected but not authenticated
-        if (!isAuthenticated) {
-            try {
-                toast.info('Please sign the message to authenticate...');
-                await authenticateWallet();
-                toast.success('Authentication successful!');
-            } catch (error) {
-                toast.error(error.message || 'Authentication failed');
-                return;
-            }
         }
 
         if (!formData.employeeId) {
@@ -111,18 +95,6 @@ function ReviewForm() {
         if (!isConnected) {
             toast.error('Please connect your wallet first');
             return;
-        }
-
-        // Auto-authenticate if connected but not authenticated
-        if (!isAuthenticated) {
-            try {
-                toast.info('Please sign the message to authenticate...');
-                await authenticateWallet();
-                toast.success('Authentication successful!');
-            } catch (error) {
-                toast.error(error.message || 'Authentication failed');
-                return;
-            }
         }
 
         if (!isVerified) {

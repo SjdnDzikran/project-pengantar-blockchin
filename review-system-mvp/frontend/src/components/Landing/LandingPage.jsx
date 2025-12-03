@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Shield, Database, Lock, ChevronRight, Boxes } from 'lucide-react';
 import Button from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import useWalletStore from '../../store/walletStore';
-import useAuthStore from '../../store/authStore';
 import { toast } from 'react-toastify';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const { connectWallet, isConnected, isConnecting } = useWalletStore();
-  const { isAuthenticated } = useAuthStore();
 
   const handleConnect = async () => {
     try {
