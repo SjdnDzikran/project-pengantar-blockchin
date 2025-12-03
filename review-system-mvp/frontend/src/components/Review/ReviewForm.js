@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { companyAPI, reviewAPI, verificationAPI } from '../../services/api';
 
 function ReviewForm() {
     const { companyId } = useParams();
-    const navigate = useNavigate();
     const [company, setCompany] = useState(null);
     const [isVerified, setIsVerified] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -20,6 +19,7 @@ function ReviewForm() {
 
     useEffect(() => {
         checkVerificationAndFetchCompany();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [companyId]);
 
     const checkVerificationAndFetchCompany = async () => {

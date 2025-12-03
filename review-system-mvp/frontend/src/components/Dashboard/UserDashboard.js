@@ -11,7 +11,7 @@ function UserDashboard() {
     const [verifying, setVerifying] = useState({});
     const [verificationResults, setVerificationResults] = useState({});
     const navigate = useNavigate();
-    const { clearAuth, user } = useAuthStore();
+    const { clearAuth } = useAuthStore();
 
     useEffect(() => {
         fetchDashboardData();

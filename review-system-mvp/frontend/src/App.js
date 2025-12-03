@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import useAuthStore from './store/authStore';
+import useWalletStore from './store/walletStore';
+import LandingPage from './components/Landing/LandingPage';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import CompanyList from './components/Company/CompanyList';
@@ -19,6 +21,13 @@ function ProtectedRoute({ children }) {
 }
 
 function App() {
+    const setupListeners = useWalletStore((state) => state.setupListeners);
+
+    useEffect(() => {
+        // Setup wallet event listeners on mount
+        setupListeners();
+    }, [setupListeners]);
+
     return (
         <Router>
             <div className="App">
@@ -32,9 +41,13 @@ function App() {
                     pauseOnFocusLoss
                     draggable
                     pauseOnHover
+                    theme="dark"
                 />
 
                 <Routes>
+                    {/* Landing Page */}
+                    <Route path="/" element={<LandingPage />} />
+
                     {/* Public Routes */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
@@ -59,8 +72,7 @@ function App() {
                         }
                     />
 
-                    {/* Default Route */}
-                    <Route path="/" element={<Navigate to="/companies" />} />
+                    {/* Default redirect removed - landing page is now at / */}
                 </Routes>
             </div>
         </Router>
