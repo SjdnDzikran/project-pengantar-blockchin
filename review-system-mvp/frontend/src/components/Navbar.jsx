@@ -8,8 +8,31 @@ import { toast } from 'react-toastify';
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const [connecting, setConnecting] = React.useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { isConnected, address, disconnectWallet } = useWalletStore();
+  const { isConnected, address, connectWallet, authenticateWallet, disconnectWallet } = useWalletStore();
+
+  const handleConnect = async () => {
+    try {
+      setConnecting(true);
+      
+      // Step 1: Connect wallet
+      const address = await connectWallet();
+      toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+      
+      // Step 2: Authenticate with backend (sign message)
+      toast.info('Please sign the message to authenticate...');
+      await authenticateWallet();
+      toast.success('Authentication successful!');
+      
+      // Stay on current page after authentication
+    } catch (error) {
+      console.error('Connection/auth error:', error);
+      toast.error(error.message || 'Failed to connect wallet');
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   const handleDisconnect = () => {
     disconnectWallet();
@@ -71,11 +94,12 @@ export default function Navbar() {
               </div>
             ) : (
               <Button
-                onClick={() => navigate('/')}
+                onClick={handleConnect}
+                disabled={connecting}
                 className="flex items-center gap-2"
               >
                 <Wallet className="h-4 w-4" />
-                Connect Wallet
+                {connecting ? 'Connecting...' : 'Connect Wallet'}
               </Button>
             )}
           </div>

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Building2, MapPin, Star, ArrowLeft, Shield, Clock, Hash, CheckCircle, XCircle, Wallet } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { companyAPI, reviewAPI } from '../../services/api';
 import useAuthStore from '../../store/authStore';
+import useWalletStore from '../../store/walletStore';
+import Navbar from '../Navbar';
+import Button from '../ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 
 function CompanyDetail() {
     const { id } = useParams();
@@ -12,7 +17,9 @@ function CompanyDetail() {
     const [loading, setLoading] = useState(true);
     const [verifying, setVerifying] = useState({});
     const [verificationResults, setVerificationResults] = useState({});
+    const [connecting, setConnecting] = useState(false);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const { connectWallet, authenticateWallet } = useWalletStore();
 
     useEffect(() => {
         fetchCompanyDetails();
@@ -56,16 +63,41 @@ function CompanyDetail() {
         }
     };
 
-    const renderStars = (rating) => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-            stars.push(
-                <span key={i} className={`star ${i <= rating ? 'filled' : ''}`}>
-                    ★
-                </span>
-            );
+    const handleConnect = async () => {
+        try {
+            setConnecting(true);
+            
+            // Step 1: Connect wallet
+            const address = await connectWallet();
+            toast.success(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+            
+            // Step 2: Authenticate with backend (sign message)
+            toast.info('Please sign the message to authenticate...');
+            await authenticateWallet();
+            toast.success('Authentication successful!');
+        } catch (error) {
+            console.error('Connection/auth error:', error);
+            toast.error(error.message || 'Failed to connect wallet');
+        } finally {
+            setConnecting(false);
         }
-        return stars;
+    };
+
+    const renderStars = (rating) => {
+        return (
+            <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                        key={star}
+                        className={`h-5 w-5 ${
+                            star <= rating
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-slate-600'
+                        }`}
+                    />
+                ))}
+            </div>
+        );
     };
 
     const formatDate = (timestamp) => {
@@ -73,194 +105,241 @@ function CompanyDetail() {
     };
 
     if (loading) {
-        return <div className="loading">Loading...</div>;
+        return (
+            <div className="min-h-screen bg-slate-950">
+                <Navbar />
+                <div className="container mx-auto px-4 py-20 text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+                    <p className="mt-4 text-slate-400">Loading company details...</p>
+                </div>
+            </div>
+        );
     }
 
     if (!company) {
         return (
-            <div className="container">
-                <div className="card">
-                    <p>Company not found.</p>
-                    <Link to="/companies" className="btn btn-primary">Back to Companies</Link>
+            <div className="min-h-screen bg-slate-950">
+                <Navbar />
+                <div className="container mx-auto px-4 py-20">
+                    <Card>
+                        <CardContent className="py-12 text-center">
+                            <Building2 className="h-12 w-12 mx-auto text-slate-600 mb-4" />
+                            <p className="text-slate-400 mb-4">Company not found.</p>
+                            <Button onClick={() => navigate('/companies')}>
+                                Back to Companies
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         );
     }
 
     return (
-        <div>
-            <nav className="navbar">
-                <Link to="/" className="navbar-brand">Company Review System</Link>
-                <div className="navbar-links">
-                    <Link to="/companies">Companies</Link>
-                    {isAuthenticated && <Link to="/dashboard">Dashboard</Link>}
-                </div>
-            </nav>
+        <div className="min-h-screen bg-slate-950">
+            <Navbar />
 
-            <div className="container">
-                <div style={{ marginBottom: '1rem' }}>
-                    <Link to="/companies">← Back to Companies</Link>
-                </div>
+            <div className="container mx-auto px-4 py-8">
+                <Link 
+                    to="/companies" 
+                    className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors mb-6"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Companies
+                </Link>
 
-                <div className="card" style={{ marginBottom: '2rem' }}>
-                    <h1>{company.company_name}</h1>
-                    <p style={{ color: '#64748b', marginBottom: '1rem' }}>
-                        {company.industry} • {company.location}
-                    </p>
+                {/* Company Header Card */}
+                <Card className="mb-8">
+                    <CardHeader>
+                        <CardTitle className="text-3xl flex items-center gap-3">
+                            <Building2 className="h-8 w-8 text-blue-500" />
+                            {company.company_name}
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-3 text-lg">
+                            <span>{company.industry}</span>
+                            {company.location && (
+                                <>
+                                    <span>•</span>
+                                    <MapPin className="h-4 w-4" />
+                                    <span>{company.location}</span>
+                                </>
+                            )}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {company.description && (
+                            <p className="text-slate-300 mb-6">{company.description}</p>
+                        )}
 
-                    {company.description && (
-                        <p style={{ marginBottom: '1rem' }}>{company.description}</p>
-                    )}
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div className="rating-stars">
+                        {/* Rating Display */}
+                        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-800">
                             {renderStars(Math.round(company.average_rating || 0))}
+                            <span className="text-3xl font-bold text-slate-100">
+                                {company.average_rating ? Number(company.average_rating).toFixed(1) : '0.0'}
+                            </span>
+                            <span className="text-slate-400">
+                                ({company.total_reviews || 0} reviews)
+                            </span>
                         </div>
-                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                            {company.average_rating ? Number(company.average_rating).toFixed(1) : '0.0'}
-                        </span>
-                        <span style={{ color: '#64748b' }}>
-                            ({company.total_reviews || 0} reviews)
-                        </span>
-                    </div>
 
-                    {/* Blockchain Data Section */}
-                    <div style={{
-                        background: '#f8fafc',
-                        padding: '1rem',
-                        borderRadius: '6px',
-                        marginBottom: '1.5rem',
-                        fontSize: '0.875rem'
-                    }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#1e293b' }}>
-                            🔗 Blockchain Data
-                        </div>
-                        <div style={{ fontFamily: 'monospace', color: '#475569', wordBreak: 'break-all' }}>
-                            <div style={{ marginBottom: '0.25rem' }}>
-                                <strong>Company Hash:</strong> {company.company_id}
+                        {/* Blockchain Data Section */}
+                        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6">
+                            <div className="flex items-center gap-2 font-semibold text-slate-100 mb-3">
+                                <Shield className="h-5 w-5 text-blue-500" />
+                                Blockchain Data
+                            </div>
+                            <div className="font-mono text-sm text-slate-400 break-all">
+                                <div className="flex gap-2">
+                                    <span className="text-slate-500">Company Hash:</span>
+                                    <span>{company.company_id}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {isAuthenticated ? (
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => navigate(`/review/${company.company_id}`)}
-                        >
-                            Write a Review
-                        </button>
-                    ) : (
-                        <p style={{ color: '#64748b' }}>
-                            <Link to="/login">Login</Link> to write a review
-                        </p>
-                    )}
-                </div>
+                        {isAuthenticated ? (
+                            <Button
+                                size="lg"
+                                onClick={() => navigate(`/review/${company.company_id}`)}
+                            >
+                                Write a Review
+                            </Button>
+                        ) : (
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                onClick={handleConnect}
+                                disabled={connecting}
+                                className="flex items-center gap-2"
+                            >
+                                <Wallet className="h-5 w-5" />
+                                {connecting ? 'Connecting...' : 'Connect Wallet to Review'}
+                            </Button>
+                        )}
+                    </CardContent>
+                </Card>
 
-                <h2 style={{ marginBottom: '1rem' }}>Reviews ({reviews.length})</h2>
+                {/* Reviews Section */}
+                <h2 className="text-2xl font-bold text-slate-100 mb-4">
+                    Reviews ({reviews.length})
+                </h2>
 
                 {reviews.length === 0 ? (
-                    <div className="card">
-                        <p>No reviews yet. Be the first to review this company!</p>
-                    </div>
+                    <Card>
+                        <CardContent className="py-12 text-center">
+                            <Star className="h-12 w-12 mx-auto text-slate-600 mb-4" />
+                            <p className="text-slate-400">No reviews yet. Be the first to review this company!</p>
+                        </CardContent>
+                    </Card>
                 ) : (
-                    <div>
+                    <div className="space-y-6">
                         {reviews.map((review) => (
-                            <div key={review.review_id} className="card">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                    <div className="rating-stars" style={{ fontSize: '1.2rem' }}>
+                            <Card key={review.review_id}>
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
                                         {renderStars(review.rating)}
-                                    </div>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-                                        {formatDate(review.timestamp)}
-                                    </span>
-                                </div>
-
-                                {review.review_text && (
-                                    <p style={{ color: '#475569', marginTop: '0.5rem', marginBottom: '1rem' }}>
-                                        {review.review_text}
-                                    </p>
-                                )}
-
-                                {/* Blockchain Details */}
-                                <div style={{
-                                    background: '#f8fafc',
-                                    padding: '0.75rem',
-                                    borderRadius: '4px',
-                                    marginTop: '1rem',
-                                    fontSize: '0.8rem',
-                                    fontFamily: 'monospace'
-                                }}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', fontFamily: 'sans-serif', color: '#1e293b' }}>
-                                        🔗 Blockchain Data
-                                    </div>
-                                    <div style={{ color: '#64748b', display: 'grid', gap: '0.25rem' }}>
-                                        <div style={{ wordBreak: 'break-all' }}>
-                                            <strong>Review ID:</strong> {review.review_id}
-                                        </div>
-                                        <div style={{ wordBreak: 'break-all' }}>
-                                            <strong>Company Hash:</strong> {review.company_id}
-                                        </div>
-                                        <div style={{ wordBreak: 'break-all' }}>
-                                            <strong>Reviewer Hash:</strong> {review.reviewer_hash}
-                                        </div>
-                                        {review.employment_proof_hash && (
-                                            <div style={{ wordBreak: 'break-all' }}>
-                                                <strong>Employment Proof:</strong> {review.employment_proof_hash}
-                                            </div>
-                                        )}
-                                        <div style={{ wordBreak: 'break-all' }}>
-                                            <strong>Timestamp:</strong> {review.timestamp} ({formatDate(review.timestamp)})
+                                        <div className="flex items-center gap-2 text-slate-500 text-sm">
+                                            <Clock className="h-4 w-4" />
+                                            {formatDate(review.timestamp)}
                                         </div>
                                     </div>
-                                </div>
+                                </CardHeader>
+                                <CardContent>
+                                    {review.review_text && (
+                                        <p className="text-slate-300 mb-4">{review.review_text}</p>
+                                    )}
 
-                                {/* Verification Results */}
-                                {verificationResults[review.review_id] && (
-                                    <div style={{
-                                        background: verificationResults[review.review_id].isValid ? '#dcfce7' : '#fee2e2',
-                                        padding: '0.75rem',
-                                        borderRadius: '4px',
-                                        marginTop: '1rem',
-                                        fontSize: '0.875rem'
-                                    }}>
-                                        <div style={{
-                                            fontWeight: 'bold',
-                                            marginBottom: '0.5rem',
-                                            color: verificationResults[review.review_id].isValid ? '#166534' : '#991b1b'
-                                        }}>
-                                            {verificationResults[review.review_id].isValid ? '✓ Blockchain Verification Passed' : '✗ Blockchain Verification Failed'}
+                                    {/* Blockchain Details */}
+                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-4">
+                                        <div className="flex items-center gap-2 font-semibold text-slate-100 mb-3">
+                                            <Shield className="h-4 w-4 text-blue-500" />
+                                            Blockchain Data
                                         </div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>
-                                            <div><strong>Database Hash:</strong></div>
-                                            <div style={{ wordBreak: 'break-all', marginBottom: '0.5rem' }}>
-                                                {verificationResults[review.review_id].database.reviewHash}
+                                        <div className="font-mono text-xs text-slate-400 space-y-1">
+                                            <div className="flex flex-col sm:flex-row gap-1">
+                                                <span className="text-slate-500">Review ID:</span>
+                                                <span className="break-all">{review.review_id}</span>
                                             </div>
-                                            <div><strong>Blockchain Hash:</strong></div>
-                                            <div style={{ wordBreak: 'break-all' }}>
-                                                {verificationResults[review.review_id].blockchain.reviewHash}
+                                            <div className="flex flex-col sm:flex-row gap-1">
+                                                <span className="text-slate-500">Company Hash:</span>
+                                                <span className="break-all">{review.company_id}</span>
                                             </div>
-                                            <div style={{ marginTop: '0.5rem' }}>
-                                                <strong>Blockchain Rating:</strong> {verificationResults[review.review_id].blockchain.rating}/5
+                                            <div className="flex flex-col sm:flex-row gap-1">
+                                                <span className="text-slate-500">Reviewer Hash:</span>
+                                                <span className="break-all">{review.reviewer_hash}</span>
                                             </div>
-                                            <div>
-                                                <strong>Blockchain Timestamp:</strong> {new Date(parseInt(verificationResults[review.review_id].blockchain.timestamp) * 1000).toLocaleString()}
+                                            {review.employment_proof_hash && (
+                                                <div className="flex flex-col sm:flex-row gap-1">
+                                                    <span className="text-slate-500">Employment Proof:</span>
+                                                    <span className="break-all">{review.employment_proof_hash}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex gap-1">
+                                                <span className="text-slate-500">Timestamp:</span>
+                                                <span>{review.timestamp} ({formatDate(review.timestamp)})</span>
                                             </div>
                                         </div>
                                     </div>
-                                )}
 
-                                {/* Verify Button */}
-                                <div style={{ marginTop: '1rem' }}>
-                                    <button
-                                        className="btn btn-primary"
+                                    {/* Verification Results */}
+                                    {verificationResults[review.review_id] && (
+                                        <div className={`rounded-lg p-4 mb-4 ${
+                                            verificationResults[review.review_id].isValid
+                                                ? 'bg-green-950 border border-green-800'
+                                                : 'bg-red-950 border border-red-800'
+                                        }`}>
+                                            <div className={`flex items-center gap-2 font-semibold mb-3 ${
+                                                verificationResults[review.review_id].isValid
+                                                    ? 'text-green-400'
+                                                    : 'text-red-400'
+                                            }`}>
+                                                {verificationResults[review.review_id].isValid ? (
+                                                    <CheckCircle className="h-5 w-5" />
+                                                ) : (
+                                                    <XCircle className="h-5 w-5" />
+                                                )}
+                                                {verificationResults[review.review_id].isValid
+                                                    ? 'Blockchain Verification Passed'
+                                                    : 'Blockchain Verification Failed'}
+                                            </div>
+                                            <div className="font-mono text-xs text-slate-400 space-y-2">
+                                                <div>
+                                                    <div className="text-slate-500 mb-1">Database Hash:</div>
+                                                    <div className="break-all">
+                                                        {verificationResults[review.review_id].database.reviewHash}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-slate-500 mb-1">Blockchain Hash:</div>
+                                                    <div className="break-all">
+                                                        {verificationResults[review.review_id].blockchain.reviewHash}
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-4 pt-2">
+                                                    <div>
+                                                        <span className="text-slate-500">Blockchain Rating:</span>{' '}
+                                                        {verificationResults[review.review_id].blockchain.rating}/5
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-500">Blockchain Timestamp:</span>{' '}
+                                                        {new Date(parseInt(verificationResults[review.review_id].blockchain.timestamp) * 1000).toLocaleString()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Verify Button */}
+                                    <Button
+                                        variant="outline"
                                         onClick={() => handleVerifyReview(review.review_id)}
                                         disabled={verifying[review.review_id]}
-                                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                                        className="w-full sm:w-auto"
                                     >
-                                        {verifying[review.review_id] ? 'Verifying...' : '🔍 Verify on Blockchain'}
-                                    </button>
-                                </div>
-                            </div>
+                                        <Shield className="h-4 w-4 mr-2" />
+                                        {verifying[review.review_id] ? 'Verifying...' : 'Verify on Blockchain'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
                         ))}
                     </div>
                 )}
