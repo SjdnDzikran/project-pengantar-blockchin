@@ -217,16 +217,16 @@ function CompanyDetail() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {reviews.map((review) => (
                             <Card key={review.review_id}>
                                 <CardHeader>
                                     <div className="flex items-center justify-between">
                                         {renderStars(review.rating)}
-                                        <div className="flex items-center gap-2 text-slate-500 text-sm">
-                                            <Clock className="h-4 w-4" />
-                                            {formatDate(review.timestamp)}
-                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm mt-2">
+                                        <Clock className="h-4 w-4" />
+                                        {formatDate(review.timestamp)}
                                     </div>
                                 </CardHeader>
                                 <CardContent>
@@ -234,81 +234,35 @@ function CompanyDetail() {
                                         <p className="text-slate-300 mb-4">{review.review_text}</p>
                                     )}
 
-                                    {/* Blockchain Details */}
-                                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-4">
-                                        <div className="flex items-center gap-2 font-semibold text-slate-100 mb-3">
-                                            <Shield className="h-4 w-4 text-blue-500" />
-                                            Blockchain Data
-                                        </div>
-                                        <div className="font-mono text-xs text-slate-400 space-y-1">
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="text-slate-500">Review ID:</span>
-                                                <span className="break-all">{review.review_id}</span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="text-slate-500">Company Hash:</span>
-                                                <span className="break-all">{review.company_id}</span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="text-slate-500">Reviewer Hash:</span>
-                                                <span className="break-all">{review.reviewer_hash}</span>
-                                            </div>
-                                            {review.employment_proof_hash && (
-                                                <div className="flex flex-col sm:flex-row gap-1">
-                                                    <span className="text-slate-500">Employment Proof:</span>
-                                                    <span className="break-all">{review.employment_proof_hash}</span>
-                                                </div>
-                                            )}
-                                            <div className="flex gap-1">
-                                                <span className="text-slate-500">Timestamp:</span>
-                                                <span>{review.timestamp} ({formatDate(review.timestamp)})</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     {/* Verification Results */}
                                     {verificationResults[review.review_id] && (
-                                        <div className={`rounded-lg p-4 mb-4 ${
+                                        <div className={`rounded-lg p-3 mb-4 text-sm ${
                                             verificationResults[review.review_id].isValid
                                                 ? 'bg-green-950 border border-green-800'
                                                 : 'bg-red-950 border border-red-800'
                                         }`}>
-                                            <div className={`flex items-center gap-2 font-semibold mb-3 ${
+                                            <div className={`flex items-center gap-2 font-semibold mb-2 ${
                                                 verificationResults[review.review_id].isValid
                                                     ? 'text-green-400'
                                                     : 'text-red-400'
                                             }`}>
                                                 {verificationResults[review.review_id].isValid ? (
-                                                    <CheckCircle className="h-5 w-5" />
+                                                    <CheckCircle className="h-4 w-4" />
                                                 ) : (
-                                                    <XCircle className="h-5 w-5" />
+                                                    <XCircle className="h-4 w-4" />
                                                 )}
                                                 {verificationResults[review.review_id].isValid
-                                                    ? 'Blockchain Verification Passed'
-                                                    : 'Blockchain Verification Failed'}
+                                                    ? 'Verified'
+                                                    : 'Failed'}
                                             </div>
-                                            <div className="font-mono text-xs text-slate-400 space-y-2">
-                                                <div>
-                                                    <div className="text-slate-500 mb-1">Database Hash:</div>
-                                                    <div className="break-all">
-                                                        {verificationResults[review.review_id].database.reviewHash}
-                                                    </div>
+                                            <div className="font-mono text-xs text-slate-400 space-y-1">
+                                                <div className="break-all">
+                                                    <span className="text-slate-500">Hash:</span>{' '}
+                                                    {verificationResults[review.review_id].blockchain.reviewHash}
                                                 </div>
                                                 <div>
-                                                    <div className="text-slate-500 mb-1">Blockchain Hash:</div>
-                                                    <div className="break-all">
-                                                        {verificationResults[review.review_id].blockchain.reviewHash}
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-4 pt-2">
-                                                    <div>
-                                                        <span className="text-slate-500">Blockchain Rating:</span>{' '}
-                                                        {verificationResults[review.review_id].blockchain.rating}/5
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500">Blockchain Timestamp:</span>{' '}
-                                                        {new Date(parseInt(verificationResults[review.review_id].blockchain.timestamp) * 1000).toLocaleString()}
-                                                    </div>
+                                                    <span className="text-slate-500">Rating:</span>{' '}
+                                                    {verificationResults[review.review_id].blockchain.rating}/5
                                                 </div>
                                             </div>
                                         </div>
@@ -319,7 +273,7 @@ function CompanyDetail() {
                                         variant="outline"
                                         onClick={() => handleVerifyReview(review.review_id)}
                                         disabled={verifying[review.review_id]}
-                                        className="w-full sm:w-auto"
+                                        className="w-full"
                                     >
                                         <Shield className="h-4 w-4 mr-2" />
                                         {verifying[review.review_id] ? 'Verifying...' : 'Verify on Blockchain'}
