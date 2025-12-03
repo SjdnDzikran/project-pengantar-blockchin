@@ -60,6 +60,7 @@ export const companyAPI = {
 
 // Review APIs
 export const reviewAPI = {
+    prepare: (data) => api.post('/reviews/prepare', data),
     submit: (data) => api.post('/reviews', data),
     getById: (id) => api.get(`/reviews/${id}`),
     getUserReviews: () => api.get('/reviews/user'),

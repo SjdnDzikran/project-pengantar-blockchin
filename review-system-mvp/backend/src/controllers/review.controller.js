@@ -4,9 +4,10 @@ const { generateReviewId, hashEmail, hashEmployeeId, hashReviewContent } = requi
 
 /**
  * Submit new review
+ * Note: Frontend now handles blockchain transaction, backend only stores metadata
  */
 async function submitReview(req, res) {
-    const { companyId, rating, reviewText, employeeId } = req.body;
+    const { companyId, rating, reviewText, employeeId, blockchainData } = req.body;
     const userId = req.user.userId;
     const walletAddress = req.user.walletAddress; // From JWT token
 
@@ -16,6 +17,13 @@ async function submitReview(req, res) {
             return res.status(400).json({
                 success: false,
                 message: 'Company ID and rating are required'
+            });
+        }
+
+        if (!blockchainData || !blockchainData.transactionHash || !blockchainData.reviewId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Blockchain transaction data is required'
             });
         }
 
@@ -55,50 +63,26 @@ async function submitReview(req, res) {
             });
         }
 
-        // Generate review ID
-        const reviewId = generateReviewId();
+        const { reviewId, transactionHash, blockNumber, gasUsed, reviewHash } = blockchainData;
 
-        // Hash reviewer identity (using wallet address)
-        const reviewerHash = hashEmail(walletAddress); // Reusing hashEmail function for wallet address
-
-        // Hash employment proof
-        const employmentProof = employeeId ? hashEmployeeId(employeeId) : reviewerHash;
-
-        // Create review content for hashing
-        const timestamp = Math.floor(Date.now() / 1000);
-        const reviewData = {
-            companyId,
-            rating,
-            reviewText: reviewText || '',
-            timestamp
-        };
-
-        // Hash the full review content
-        const reviewHash = hashReviewContent(reviewData);
-
-        console.log(`Submitting review ${reviewId} to blockchain...`);
-
-        // Store on blockchain
-        const blockchainResult = await blockchainService.storeReview({
-            reviewId,
-            companyId,
-            reviewerHash,
-            reviewHash,
-            rating,
-            employmentProof
-        });
-
-        console.log(`✓ Review stored on blockchain: ${blockchainResult.transactionHash}`);
+        console.log(`✓ Review ${reviewId} submitted to blockchain by user: ${transactionHash}`);
 
         // Store metadata in database
         await pool.query(
             `INSERT INTO review_metadata
              (review_id, user_id, company_id, wallet_address, blockchain_tx_hash, block_number, review_hash)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [reviewId, userId, companyId, walletAddress, blockchainResult.transactionHash, blockchainResult.blockNumber, reviewHash]
+            [reviewId, userId, companyId, walletAddress, transactionHash, blockNumber, reviewHash]
         );
 
+        // Hash reviewer identity (using wallet address)
+        const reviewerHash = hashEmail(walletAddress);
+        
+        // Hash employment proof
+        const employmentProof = employeeId ? hashEmployeeId(employeeId) : reviewerHash;
+
         // Store in cache for fast queries
+        const timestamp = Math.floor(Date.now() / 1000);
         await pool.query(
             `INSERT INTO review_cache
              (review_id, company_id, company_name, rating, review_text, reviewer_hash, employment_proof_hash, timestamp)
@@ -111,9 +95,9 @@ async function submitReview(req, res) {
             message: 'Review submitted successfully',
             data: {
                 reviewId,
-                transactionHash: blockchainResult.transactionHash,
-                blockNumber: blockchainResult.blockNumber.toString(),
-                gasUsed: blockchainResult.gasUsed.toString(),
+                transactionHash,
+                blockNumber: blockNumber.toString(),
+                gasUsed: gasUsed.toString(),
                 reviewHash
             }
         });
@@ -256,8 +240,83 @@ async function getUserReviews(req, res) {
     }
 }
 
+/**
+ * Prepare review data for blockchain submission
+ * Returns hashes and reviewId that frontend will use to submit transaction
+ */
+async function prepareReview(req, res) {
+    const { companyId, rating, reviewText, employeeId } = req.body;
+    const userId = req.user.userId;
+    const walletAddress = req.user.walletAddress;
+
+    try {
+        // Validate input
+        if (!companyId || !rating) {
+            return res.status(400).json({
+                success: false,
+                message: 'Company ID and rating are required'
+            });
+        }
+
+        // Check employment verification
+        const verificationResult = await pool.query(
+            `SELECT verification_id FROM employment_verifications
+             WHERE user_id = $1 AND company_id = $2 AND status = 'approved'`,
+            [userId, companyId]
+        );
+
+        if (verificationResult.rows.length === 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'You must verify your employment before submitting a review'
+            });
+        }
+
+        // Generate review ID
+        const reviewId = generateReviewId();
+
+        // Hash reviewer identity (using wallet address)
+        const reviewerHash = hashEmail(walletAddress);
+
+        // Hash employment proof
+        const employmentProof = employeeId ? hashEmployeeId(employeeId) : reviewerHash;
+
+        // Create review content for hashing
+        const timestamp = Math.floor(Date.now() / 1000);
+        const reviewData = {
+            companyId,
+            rating,
+            reviewText: reviewText || '',
+            timestamp
+        };
+
+        // Hash the full review content
+        const reviewHash = hashReviewContent(reviewData);
+
+        res.json({
+            success: true,
+            data: {
+                reviewId,
+                companyId,
+                reviewerHash,
+                reviewHash,
+                rating,
+                employmentProof
+            }
+        });
+    } catch (error) {
+        console.error('Prepare review error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to prepare review',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     submitReview,
+    prepareReview,
     getReviewById,
     verifyReview,
     getUserReviews

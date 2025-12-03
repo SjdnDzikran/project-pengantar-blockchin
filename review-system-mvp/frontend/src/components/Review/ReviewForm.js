@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, ArrowLeft, CheckCircle, Shield, Hash, Loader, Building2, AlertTriangle } from 'lucide-react';
+import { Star, ArrowLeft, CheckCircle, Shield, Hash, Loader, Building2, AlertTriangle, Wallet } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { companyAPI, reviewAPI, verificationAPI } from '../../services/api';
+import { submitReviewToBlockchain } from '../../services/blockchain';
+import useWalletStore from '../../store/walletStore';
+import useAuthStore from '../../store/authStore';
 import Navbar from '../Navbar';
 import Button from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
@@ -10,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 function ReviewForm() {
     const { companyId } = useParams();
     const navigate = useNavigate();
+    const { isConnected, address, connectWallet, authenticateWallet } = useWalletStore();
+    const { isAuthenticated } = useAuthStore();
     const [company, setCompany] = useState(null);
     const [isVerified, setIsVerified] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -50,6 +55,11 @@ function ReviewForm() {
     const handleVerification = async (e) => {
         e.preventDefault();
 
+        if (!isConnected || !isAuthenticated) {
+            toast.error('Please connect and authenticate your wallet first');
+            return;
+        }
+
         if (!formData.employeeId) {
             toast.error('Employee ID is required');
             return;
@@ -72,6 +82,11 @@ function ReviewForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!isConnected || !isAuthenticated) {
+            toast.error('Please connect and authenticate your wallet first');
+            return;
+        }
+
         if (!isVerified) {
             toast.error('Please verify your employment first');
             return;
@@ -80,17 +95,46 @@ function ReviewForm() {
         setSubmitting(true);
 
         try {
-            const response = await reviewAPI.submit({
+            // Step 1: Prepare review data (get hashes from backend)
+            toast.info('Preparing review data...');
+            const prepareResponse = await reviewAPI.prepare({
                 companyId,
                 rating: formData.rating,
                 reviewText: formData.reviewText,
                 employeeId: formData.employeeId
             });
 
-            toast.success('Review submitted successfully to blockchain!');
+            const reviewData = prepareResponse.data.data;
+            console.log('Review data prepared:', reviewData);
+
+            // Step 2: Submit to blockchain with user's wallet
+            toast.info('Please confirm the transaction in your wallet...');
+            const blockchainResult = await submitReviewToBlockchain(reviewData);
+            
+            console.log('Blockchain transaction confirmed:', blockchainResult);
+            toast.success('Review submitted to blockchain!');
+
+            // Step 3: Store metadata in backend database
+            toast.info('Saving review data...');
+            const response = await reviewAPI.submit({
+                companyId,
+                rating: formData.rating,
+                reviewText: formData.reviewText,
+                employeeId: formData.employeeId,
+                blockchainData: {
+                    reviewId: reviewData.reviewId,
+                    transactionHash: blockchainResult.transactionHash,
+                    blockNumber: blockchainResult.blockNumber,
+                    gasUsed: blockchainResult.gasUsed,
+                    reviewHash: reviewData.reviewHash
+                }
+            });
+
+            toast.success('Review saved successfully!');
             setSubmissionResult(response.data.data);
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to submit review');
+            console.error('Submit error:', error);
+            toast.error(error.message || 'Failed to submit review');
             setSubmitting(false);
         }
     };
@@ -279,6 +323,35 @@ function ReviewForm() {
                                 You must verify your employment with {company.company_name} before submitting a review.
                             </p>
 
+                            {!isConnected || !isAuthenticated ? (
+                                <div className="bg-yellow-950 border border-yellow-800 rounded-lg p-4 mb-6">
+                                    <div className="flex items-start gap-3">
+                                        <Wallet className="h-5 w-5 text-yellow-400 mt-0.5 shrink-0" />
+                                        <div>
+                                            <p className="text-yellow-200 font-semibold mb-2">Wallet Connection Required</p>
+                                            <p className="text-yellow-200 text-sm mb-4">
+                                                You need to connect and authenticate your wallet to verify employment and submit reviews.
+                                            </p>
+                                            <Button
+                                                onClick={async () => {
+                                                    try {
+                                                        const addr = await connectWallet();
+                                                        await authenticateWallet();
+                                                        toast.success('Wallet connected and authenticated!');
+                                                    } catch (error) {
+                                                        toast.error(error.message || 'Failed to connect wallet');
+                                                    }
+                                                }}
+                                                className="bg-yellow-600 hover:bg-yellow-700"
+                                            >
+                                                <Wallet className="h-4 w-4 mr-2" />
+                                                Connect Wallet
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
+
                             <form onSubmit={handleVerification} className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -297,7 +370,7 @@ function ReviewForm() {
                                     </small>
                                 </div>
 
-                                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+                                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={!isConnected || !isAuthenticated}>
                                     <Shield className="h-4 w-4 mr-2" />
                                     Verify Employment
                                 </Button>
@@ -307,6 +380,35 @@ function ReviewForm() {
                 ) : (
                     <Card className="bg-slate-900 border-slate-800">
                         <CardContent className="pt-6">
+                            {!isConnected || !isAuthenticated ? (
+                                <div className="bg-yellow-950 border border-yellow-800 rounded-lg p-4 mb-6">
+                                    <div className="flex items-start gap-3">
+                                        <Wallet className="h-5 w-5 text-yellow-400 mt-0.5 shrink-0" />
+                                        <div>
+                                            <p className="text-yellow-200 font-semibold mb-2">Wallet Connection Required</p>
+                                            <p className="text-yellow-200 text-sm mb-4">
+                                                You need to connect your wallet to submit reviews to the blockchain.
+                                            </p>
+                                            <Button
+                                                onClick={async () => {
+                                                    try {
+                                                        const addr = await connectWallet();
+                                                        await authenticateWallet();
+                                                        toast.success('Wallet connected and authenticated!');
+                                                    } catch (error) {
+                                                        toast.error(error.message || 'Failed to connect wallet');
+                                                    }
+                                                }}
+                                                className="bg-yellow-600 hover:bg-yellow-700"
+                                            >
+                                                <Wallet className="h-4 w-4 mr-2" />
+                                                Connect Wallet
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
+
                             <div className="flex items-center gap-3 p-3 bg-green-950 border border-green-800 rounded-lg mb-6">
                                 <CheckCircle className="h-5 w-5 text-green-400 shrink-0" />
                                 <p className="text-green-400 font-medium">
@@ -346,7 +448,7 @@ function ReviewForm() {
                                 <Button
                                     type="submit"
                                     className="w-full bg-blue-600 hover:bg-blue-700"
-                                    disabled={submitting}
+                                    disabled={submitting || !isConnected || !isAuthenticated}
                                 >
                                     {submitting ? (
                                         <>
