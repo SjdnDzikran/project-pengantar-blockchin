@@ -21,6 +21,8 @@ ENV PORT=3001
 
 COPY --from=backend-builder /app/backend /app/backend
 COPY --from=frontend-builder /app/frontend/build /app/frontend/build
+# Include compiled contract artifacts for blockchain interactions
+COPY blockchain/build /app/blockchain/build
 
 EXPOSE 3001
 

@@ -28,10 +28,23 @@ class BlockchainService {
             console.log(`  Chain ID: ${chainId}`);
             console.log(`  Block number: ${blockNumber}`);
 
-            // Load contract ABI
-            const abiPath = path.join(__dirname, '../../../blockchain/build/CompanyReviewLedger.abi');
+            // Load contract ABI - try multiple paths
+            const possiblePaths = [
+                path.join(__dirname, '../../../blockchain/build/CompanyReviewLedger.abi'),
+                path.join(process.cwd(), 'blockchain/build/CompanyReviewLedger.abi'),
+                '/app/blockchain/build/CompanyReviewLedger.abi'
+            ];
 
-            if (fs.existsSync(abiPath)) {
+            let abiPath = null;
+            for (const testPath of possiblePaths) {
+                if (fs.existsSync(testPath)) {
+                    abiPath = testPath;
+                    console.log(`✓ Found ABI at: ${testPath}`);
+                    break;
+                }
+            }
+
+            if (abiPath) {
                 const abi = JSON.parse(fs.readFileSync(abiPath, 'utf8'));
                 const contractAddress = process.env.CONTRACT_ADDRESS;
 
@@ -40,10 +53,12 @@ class BlockchainService {
                     console.log(`✓ Smart contract loaded at: ${contractAddress}`);
                     this.initialized = true;
                 } else {
-                    console.warn('⚠ Contract address not configured. Please deploy contract first.');
+                    console.warn('⚠ Contract address not configured. Set CONTRACT_ADDRESS in environment.');
                 }
             } else {
-                console.warn('⚠ Contract ABI not found. Please compile and deploy contract first.');
+                console.warn('⚠ Contract ABI not found at any of these paths:');
+                possiblePaths.forEach(p => console.warn(`   - ${p}`));
+                console.warn('  Please ensure blockchain/build/CompanyReviewLedger.abi exists.');
             }
 
             return true;
