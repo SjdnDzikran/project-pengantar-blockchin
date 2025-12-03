@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Search, Star, MapPin, Building2, Plus, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { companyAPI } from '../../services/api';
@@ -49,10 +49,6 @@ function CompanyList() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleLogout = () => {
-        // Removed - handled by Navbar
     };
 
     const handleCreateCompany = async (e) => {

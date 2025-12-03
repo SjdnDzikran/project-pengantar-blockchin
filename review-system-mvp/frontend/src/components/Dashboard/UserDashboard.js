@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Shield, Hash, CheckCircle, XCircle, Loader, Building2, Calendar, User, Mail, FileText, Search } from 'lucide-react';
+import { Star, Shield, CheckCircle, XCircle, Loader, Building2, User, FileText } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { reviewAPI, authAPI } from '../../services/api';
-import useAuthStore from '../../store/authStore';
+import { reviewAPI } from '../../services/api';
+import useWalletStore from '../../store/walletStore';
 import Navbar from '../Navbar';
 import Button from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
 
 function UserDashboard() {
-    const [profile, setProfile] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [verifying, setVerifying] = useState({});
     const [verificationResults, setVerificationResults] = useState({});
     const navigate = useNavigate();
-    const { clearAuth } = useAuthStore();
+    const { address } = useWalletStore();
 
     useEffect(() => {
         fetchDashboardData();
@@ -23,24 +22,17 @@ function UserDashboard() {
 
     const fetchDashboardData = async () => {
         try {
-            const [profileRes, reviewsRes] = await Promise.all([
-                authAPI.getProfile(),
-                reviewAPI.getUserReviews()
-            ]);
-
-            setProfile(profileRes.data.data);
-            setReviews(reviewsRes.data.data);
+            // Since we removed authentication, we'll show all reviews for now
+            // In production, you'd filter by wallet address on the backend
+            const reviewsRes = await reviewAPI.getUserReviews();
+            setReviews(reviewsRes.data.data || []);
         } catch (error) {
-            toast.error('Failed to fetch dashboard data');
+            console.error('Failed to fetch reviews:', error);
+            // Don't show error toast, just show empty state
+            setReviews([]);
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleLogout = () => {
-        clearAuth();
-        toast.success('Logged out successfully');
-        navigate('/login');
     };
 
     const handleVerifyReview = async (reviewId) => {
@@ -99,38 +91,26 @@ function UserDashboard() {
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold text-white mb-8">My Dashboard</h1>
 
-                {profile && (
-                    <Card className="bg-slate-900 border-slate-800 mb-8">
-                        <CardContent className="pt-6">
-                            <div className="flex items-center gap-2 mb-6">
-                                <User className="h-5 w-5 text-blue-400" />
-                                <h2 className="text-xl font-semibold text-white">Profile</h2>
+                <Card className="bg-slate-900 border-slate-800 mb-8">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-6">
+                            <User className="h-5 w-5 text-blue-400" />
+                            <h2 className="text-xl font-semibold text-white">Wallet Info</h2>
+                        </div>
+                        <div className="grid gap-4">
+                            <div className="flex items-center gap-3">
+                                <User className="h-4 w-4 text-slate-500" />
+                                <span className="text-slate-400">Wallet Address:</span>
+                                <span className="text-white font-mono">{address}</span>
                             </div>
-                            <div className="grid gap-4">
-                                <div className="flex items-center gap-3">
-                                    <User className="h-4 w-4 text-slate-500" />
-                                    <span className="text-slate-400">Name:</span>
-                                    <span className="text-white">{profile.fullName || 'Not set'}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Mail className="h-4 w-4 text-slate-500" />
-                                    <span className="text-slate-400">Email:</span>
-                                    <span className="text-white">{profile.email}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Calendar className="h-4 w-4 text-slate-500" />
-                                    <span className="text-slate-400">Member Since:</span>
-                                    <span className="text-white">{formatDate(profile.createdAt)}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <FileText className="h-4 w-4 text-slate-500" />
-                                    <span className="text-slate-400">Total Reviews:</span>
-                                    <span className="text-white font-semibold">{profile.reviewCount}</span>
-                                </div>
+                            <div className="flex items-center gap-3">
+                                <FileText className="h-4 w-4 text-slate-500" />
+                                <span className="text-slate-400">Total Reviews:</span>
+                                <span className="text-white font-semibold">{reviews.length}</span>
                             </div>
-                        </CardContent>
-                    </Card>
-                )}
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-semibold text-white">My Reviews ({reviews.length})</h2>
@@ -292,7 +272,7 @@ function UserDashboard() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Search className="h-4 w-4 mr-2" />
+                                                    <Shield className="h-4 w-4 mr-2" />
                                                     Verify on Blockchain
                                                 </>
                                             )}

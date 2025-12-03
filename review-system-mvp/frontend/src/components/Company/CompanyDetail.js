@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Building2, MapPin, Star, ArrowLeft, Shield, Clock, Hash, CheckCircle, XCircle, Wallet } from 'lucide-react';
+import { Building2, MapPin, Star, ArrowLeft, Shield, Clock, CheckCircle, XCircle, Wallet } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { companyAPI, reviewAPI } from '../../services/api';
-import useAuthStore from '../../store/authStore';
 import useWalletStore from '../../store/walletStore';
 import Navbar from '../Navbar';
 import Button from '../ui/Button';
@@ -17,8 +16,7 @@ function CompanyDetail() {
     const [loading, setLoading] = useState(true);
     const [verifying, setVerifying] = useState({});
     const [verificationResults, setVerificationResults] = useState({});
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const { connectWallet, isConnecting } = useWalletStore();
+    const { isConnected, connectWallet, isConnecting } = useWalletStore();
 
     useEffect(() => {
         fetchCompanyDetails();
@@ -184,7 +182,7 @@ function CompanyDetail() {
                             </div>
                         </div>
 
-                        {isAuthenticated ? (
+                        {isConnected ? (
                             <Button
                                 size="lg"
                                 onClick={() => navigate(`/review/${company.company_id}`)}
